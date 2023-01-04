@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	_ "embed"
 	"encoding/xml"
 	"fmt"
@@ -38,6 +39,15 @@ func printTest(s formatter.JUnitTestSuite, c formatter.JUnitTestCase) {
 	fmt.Printf("<p class='duration' title='Test duration'>%v</p>\n", d)
 	fmt.Printf("</div>\n")
 	fmt.Printf("</div>\n")
+}
+
+// arguments
+var (
+	xmlReports       *string
+)
+
+func init() {
+	xmlReports = flag.String("xmlReports", "", "Commad delimited path to junit xml reports")
 }
 
 func main() {
