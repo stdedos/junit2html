@@ -1,11 +1,12 @@
 package main
 
 import (
-	"flag"
+	"bytes"
 	_ "embed"
 	"encoding/xml"
+	"flag"
 	"fmt"
-	"os"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -43,7 +44,7 @@ func printTest(s formatter.JUnitTestSuite, c formatter.JUnitTestCase) {
 
 // arguments
 var (
-	xmlReports       *string
+	xmlReports *string
 )
 
 func init() {
@@ -51,11 +52,21 @@ func init() {
 }
 
 func main() {
-	suites := &formatter.JUnitTestSuites{}
-
-	err := xml.NewDecoder(os.Stdin).Decode(suites)
-	if err != nil {
-		panic(err)
+	flag.Parse()
+	files := strings.Split((*xmlReports), ",")
+	allSuites := make([]formatter.JUnitTestSuites, len(files))
+	for _, f := range files {
+		res, err := ioutil.ReadFile(f)
+		if err != nil {
+			panic(err)
+		}
+		testResult := bytes.NewReader(res)
+		suites := &formatter.JUnitTestSuites{}
+		err = xml.NewDecoder(testResult).Decode(suites)
+		if err != nil {
+			panic(err)
+		}
+		allSuites = append(allSuites, *suites)
 	}
 
 	fmt.Println("<html>")
@@ -66,6 +77,8 @@ func main() {
 	fmt.Println("</style>")
 	fmt.Println("</head>")
 	fmt.Println("<body>")
+
+	suites := allSuites[0]
 	failures, total := 0, 0
 	for _, s := range suites.Suites {
 		failures += s.Failures
