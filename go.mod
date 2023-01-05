@@ -1,4 +1,4 @@
-module github.com/alexec/junit2html
+module github.com/or-shachar/junit2html
 
 go 1.18
 
