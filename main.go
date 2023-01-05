@@ -49,7 +49,6 @@ var (
 
 func init() {
 	xmlReports = flag.String("xmlReports", "", "Commad delimited path to junit xml reports")
-	output = flag.String("output", "report.html", "html output")
 }
 
 func main() {
