@@ -7,6 +7,8 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -48,14 +50,27 @@ var (
 )
 
 func init() {
-	xmlReports = flag.String("xmlReports", "", "Commad delimited path to junit xml reports")
+	xmlReports = flag.String("xmlReports", "", "Comma delimited glob expressions describing the files to scan")
 }
 
 func main() {
 	flag.Parse()
-	files := strings.Split((*xmlReports), ",")
+	if (*xmlReports) == "" {
+		panic("xmlReports cannot be empty")
+	}
+	patterns := strings.Split((*xmlReports), ",")
+	files := []string{}
+	for _, p := range patterns {
+		fmt.Fprintf(os.Stderr, "Given xmlReports '%s'\n", p)
+		matches, err := filepath.Glob(p)
+		if err != nil {
+			panic(err)
+		}
+		files = append(files, matches...)
+	}
 	allSuites := make([]formatter.JUnitTestSuites, 0, len(files))
 	for _, f := range files {
+		fmt.Fprintf(os.Stderr, "Parsing file '%s'\n", f)
 		res, err := ioutil.ReadFile(f)
 		if err != nil {
 			panic(err)
