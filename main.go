@@ -49,12 +49,13 @@ var (
 
 func init() {
 	xmlReports = flag.String("xmlReports", "", "Commad delimited path to junit xml reports")
+	output = flag.String("output", "report.html", "html output")
 }
 
 func main() {
 	flag.Parse()
 	files := strings.Split((*xmlReports), ",")
-	allSuites := make([]formatter.JUnitTestSuites, len(files))
+	allSuites := make([]formatter.JUnitTestSuites, 0, len(files))
 	for _, f := range files {
 		res, err := ioutil.ReadFile(f)
 		if err != nil {
@@ -78,28 +79,33 @@ func main() {
 	fmt.Println("</head>")
 	fmt.Println("<body>")
 
-	suites := allSuites[0]
 	failures, total := 0, 0
-	for _, s := range suites.Suites {
-		failures += s.Failures
-		total += len(s.TestCases)
+	for _, suites := range allSuites {
+		for _, s := range suites.Suites {
+			failures += s.Failures
+			total += len(s.TestCases)
+		}
 	}
 	fmt.Printf("<p>%d of %d tests failed</p>\n", failures, total)
-	for _, s := range suites.Suites {
-		if s.Failures > 0 {
-			printSuiteHeader(s)
-			for _, c := range s.TestCases {
-				if f := c.Failure; f != nil {
-					printTest(s, c)
+	for _, suites := range allSuites {
+		for _, s := range suites.Suites {
+			if s.Failures > 0 {
+				printSuiteHeader(s)
+				for _, c := range s.TestCases {
+					if f := c.Failure; f != nil {
+						printTest(s, c)
+					}
 				}
 			}
 		}
 	}
-	for _, s := range suites.Suites {
-		printSuiteHeader(s)
-		for _, c := range s.TestCases {
-			if c.Failure == nil {
-				printTest(s, c)
+	for _, suites := range allSuites {
+		for _, s := range suites.Suites {
+			printSuiteHeader(s)
+			for _, c := range s.TestCases {
+				if c.Failure == nil {
+					printTest(s, c)
+				}
 			}
 		}
 	}
