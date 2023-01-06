@@ -68,7 +68,7 @@ func main() {
 		}
 		files = append(files, matches...)
 	}
-	allSuites := make([]formatter.JUnitTestSuites, 0, len(files))
+	allSuites := make([]formatter.JUnitTestSuite, 0, len(files))
 	for _, f := range files {
 		fmt.Fprintf(os.Stderr, "Parsing file '%s'\n", f)
 		res, err := ioutil.ReadFile(f)
@@ -76,7 +76,7 @@ func main() {
 			panic(err)
 		}
 		testResult := bytes.NewReader(res)
-		suites := &formatter.JUnitTestSuites{}
+		suites := &formatter.JUnitTestSuite{}
 		err = xml.NewDecoder(testResult).Decode(suites)
 		if err != nil {
 			panic(err)
@@ -92,34 +92,27 @@ func main() {
 	fmt.Println("</style>")
 	fmt.Println("</head>")
 	fmt.Println("<body>")
-
 	failures, total := 0, 0
-	for _, suites := range allSuites {
-		for _, s := range suites.Suites {
-			failures += s.Failures
-			total += len(s.TestCases)
-		}
+	for _, s := range allSuites {
+		failures += s.Failures
+		total += len(s.TestCases)
 	}
 	fmt.Printf("<p>%d of %d tests failed</p>\n", failures, total)
-	for _, suites := range allSuites {
-		for _, s := range suites.Suites {
-			if s.Failures > 0 {
-				printSuiteHeader(s)
-				for _, c := range s.TestCases {
-					if f := c.Failure; f != nil {
-						printTest(s, c)
-					}
+	for _, s := range allSuites {
+		if s.Failures > 0 {
+			printSuiteHeader(s)
+			for _, c := range s.TestCases {
+				if f := c.Failure; f != nil {
+					printTest(s, c)
 				}
 			}
 		}
 	}
-	for _, suites := range allSuites {
-		for _, s := range suites.Suites {
-			printSuiteHeader(s)
-			for _, c := range s.TestCases {
-				if c.Failure == nil {
-					printTest(s, c)
-				}
+	for _, s := range allSuites {
+		printSuiteHeader(s)
+		for _, c := range s.TestCases {
+			if c.Failure == nil {
+				printTest(s, c)
 			}
 		}
 	}
