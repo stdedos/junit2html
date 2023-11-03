@@ -72,20 +72,22 @@ func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestC
 	output += fmt.Sprintf("<label for='%s' class='toggle'>%s<span class='badge'>%s</span></a></label>\n", id, testCase.Name, text)
 	output += fmt.Sprintf("<input type='checkbox' name='one' id='%s' class='hide-input'>", id)
 	output += "<div class='toggle-el'>\n"
+
+	d := time.Duration(testCase.Time * float64(time.Second)).Round(time.Second)
+	output += fmt.Sprintf("<p class='duration' title='Test duration'>Test duration: %v</p>\n", d)
 	if failure != nil {
 		failure.Message = strings.ReplaceAll(failure.Message, `<bool>`, `"bool"`)
 		failure.Description = strings.ReplaceAll(failure.Description, `<bool>`, `"bool"`)
 		output += fmt.Sprintf("<div class='content'><b>Failure message:</b> \n\n%s</div>\n", failure.Message)
 		output += fmt.Sprintf("<div class='content'><b>Failure description:</b> \n\n%s</div>\n", failure.Description)
-		if testCase.SystemErr != "" {
-			testCase.SystemErr = strings.ReplaceAll(testCase.SystemErr, `<bool>`, `"bool"`)
-			output += fmt.Sprintf("<div class='content'><b>Log:</b> \n\n%s</div>\n", testCase.SystemErr)
-		}
 	} else if skipped != nil {
 		output += fmt.Sprintf("<div class='content'>%s</div>\n", skipped.Message)
 	}
-	d := time.Duration(testCase.Time * float64(time.Second))
-	output += fmt.Sprintf("<p class='duration' title='Test duration'>%v</p>\n", d)
+	if testCase.SystemErr != "" {
+		testCase.SystemErr = strings.ReplaceAll(testCase.SystemErr, `<bool>`, `"bool"`)
+		output += fmt.Sprintf("<div class='content'><b>Log:</b> \n\n%s</div>\n", testCase.SystemErr)
+	}
+
 	output += "</div>\n"
 	output += "</div>\n"
 }
