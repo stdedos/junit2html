@@ -25,16 +25,16 @@ func Convert(suites *reporters.JUnitTestSuites) (string, error) {
 
 	failures, total := 0, 0
 	for _, s := range suites.TestSuites {
-		failures += s.Failures
+		failures += s.Failures + s.Errors
 		total += len(s.TestCases)
 	}
 	output += fmt.Sprintf("<p>%d of %d tests failed</p>\n", failures, total)
 	printLinkToReport(suites.TestSuites)
 	for _, s := range suites.TestSuites {
-		if s.Failures > 0 {
+		if s.Failures > 0 || s.Errors > 0 {
 			printSuiteHeader(s)
 			for _, c := range s.TestCases {
-				if f := c.Failure; f != nil {
+				if c.Failure != nil || c.Error != nil {
 					printTest(s, c)
 				}
 			}
@@ -59,6 +59,10 @@ func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestC
 	id := fmt.Sprintf("%s.%s.%s", testSuite.Name, testCase.Classname, testCase.Name)
 	class, text := "passed", "Pass"
 	failure := testCase.Failure
+	tcError := testCase.Error
+	if tcError != nil {
+		class, text = "error", "Error"
+	}
 	if failure != nil {
 		class, text = "failed", "Fail"
 	}
@@ -75,7 +79,10 @@ func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestC
 
 	d := time.Duration(testCase.Time * float64(time.Second)).Round(time.Second)
 	output += fmt.Sprintf("<p class='duration' title='Test duration'>Test duration: %v</p>\n", d)
-	if failure != nil {
+	if tcError != nil {
+		output += fmt.Sprintf("<div class='content'><b>Error message:</b> \n\n%s</div>\n", tcError.Message)
+		output += fmt.Sprintf("<div class='content'><b>Error description:</b> \n\n%s</div>\n", tcError.Description)
+	} else if failure != nil {
 		failure.Message = strings.ReplaceAll(failure.Message, `<bool>`, `"bool"`)
 		failure.Description = strings.ReplaceAll(failure.Description, `<bool>`, `"bool"`)
 		output += fmt.Sprintf("<div class='content'><b>Failure message:</b> \n\n%s</div>\n", failure.Message)

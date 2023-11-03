@@ -38,6 +38,10 @@ label {
     background-color: #fdd;
 }
 
+.error label {
+    background-color: #fdf;
+}
+
 .badge {
     background-color: #888;
     color: white;
@@ -52,6 +56,10 @@ label {
 
 .failed .badge {
     background-color: #d66;
+}
+
+.error .badge {
+    background-color: #a1a;
 }
 
 .expando {
