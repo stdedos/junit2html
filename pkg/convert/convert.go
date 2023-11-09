@@ -45,7 +45,7 @@ func Convert(suites *reporters.JUnitTestSuites) (string, error) {
 	for _, s := range suites.TestSuites {
 		printSuiteHeader(s)
 		for _, c := range s.TestCases {
-			if c.Failure == nil {
+			if c.Failure == nil && c.Error == nil {
 				printTest(s, c)
 			}
 		}
