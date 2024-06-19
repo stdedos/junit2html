@@ -1,0 +1,36 @@
+=== RUN   TestPassing
+--- PASS: TestPassing (0.00s)
+=== RUN   TestFailing
+    example_test.go:25: this test failed
+--- FAIL: TestFailing (0.00s)
+=== RUN   TestSkipped
+    example_test.go:29: this test is skipped
+--- SKIP: TestSkipped (0.00s)
+=== RUN   TestPanic
+--- FAIL: TestPanic (0.00s)
+panic: kaboom! [recovered]
+	panic: kaboom!
+
+goroutine 21 [running]:
+testing.tRunner.func1.2({0x54f520, 0x5b4da0})
+	/usr/lib/go-1.21/src/testing/testing.go:1545 +0x238
+testing.tRunner.func1()
+	/usr/lib/go-1.21/src/testing/testing.go:1548 +0x397
+panic({0x54f520?, 0x5b4da0?})
+	/usr/lib/go-1.21/src/runtime/panic.go:914 +0x21f
+github.com/stdedos/junit2html/examples.kaboom(...)
+	/home/stdedos/Documents/WorkBulk/Ubuntu/repos/A_STORAGE/junit2html/examples/example.go:10
+github.com/stdedos/junit2html/examples.TestPanic(0xc0001029c0?)
+	/home/stdedos/Documents/WorkBulk/Ubuntu/repos/A_STORAGE/junit2html/examples/example_test.go:33 +0x49
+testing.tRunner(0xc0001031e0, 0x58a598)
+	/usr/lib/go-1.21/src/testing/testing.go:1595 +0xff
+created by testing.(*T).Run in goroutine 1
+	/usr/lib/go-1.21/src/testing/testing.go:1648 +0x3ad
+FAIL	github.com/stdedos/junit2html/examples	0.005s
+=== RUN   TestCoverage
+2024/06/19 18:48:35 foo
+--- PASS: TestCoverage (0.00s)
+PASS
+coverage: 50.0% of statements
+ok  	github.com/stdedos/junit2html/examples/coverage	0.002s	coverage: 50.0% of statements
+FAIL

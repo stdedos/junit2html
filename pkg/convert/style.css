@@ -15,6 +15,7 @@ a {
 .coverage {
     font-size: small;
     font-weight: normal;
+    margin-left: 1em;
 }
 
 label {

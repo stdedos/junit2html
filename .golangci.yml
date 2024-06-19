@@ -111,8 +111,6 @@ linters-settings:
       - weakCond
 
 issues:
-  exclude-dirs:
-    - example/
   exclude-rules:
     - linters:
         - govet

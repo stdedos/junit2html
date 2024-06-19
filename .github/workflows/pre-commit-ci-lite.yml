@@ -1,3 +1,5 @@
+name: pre-commit.ci lite
+
 on:
   push:
     branches:
@@ -14,14 +16,12 @@ jobs:
       with:
         python-version: 3.x
 
-    - name: Read Go version from go.mod
-      id: go_version
-      run: echo "::set-output name=version::$(grep '^go ' go.mod | awk '{print $2}')"
-
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: ${{ steps.go_version.outputs.version }}
+        # Opposed to `tests.yaml`, we set it to a golangci-lint-compatible version:
+        # https://github.com/golangci/golangci-lint/discussions/4830
+        go-version: 1.21
 
     - name: Install dependencies
       run: go mod tidy

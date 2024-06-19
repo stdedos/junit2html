@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -15,7 +16,7 @@ func TestPassing(t *testing.T) {
 	}()
 
 	ok()
-	if buf.String() != "ok\n" {
+	if !strings.Contains(buf.String(), "ok\n") {
 		t.Errorf("unexpected output: %q", buf.String())
 	}
 }

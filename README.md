@@ -42,9 +42,9 @@ How to test this locally:
 
 ```bash
 cd examples/
-go test -v -cover ./... 2>&1 > test.out
-go-junit-report < test.out > junit.xml
-go run ..  --xmlReports junit.xml > test-report.html
+go test -v -cover ./... 2>&1 >| test.out
+go-junit-report < test.out >| junit.xml
+go run ..  --xmlReports junit.xml >| test-report.html
 ```
 
 ## Using glob patterns:

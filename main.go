@@ -29,10 +29,10 @@ func main() {
 
 	flag.Parse()
 
-	if *xmlReports != "" {
-		files, suites = suitesViaArgs()
-	} else {
+	if *xmlReports == "" {
 		files, suites = suitesViaStdin()
+	} else {
+		files, suites = suitesViaArgs()
 	}
 
 	html, err := convert.Convert(suites, files)

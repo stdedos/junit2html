@@ -6,6 +6,6 @@ func foo() {
 	log.Println("foo")
 }
 
-func bar() {
+func bar() { //revive:disable:unused Intentionally not covered
 	log.Println("bar")
 }

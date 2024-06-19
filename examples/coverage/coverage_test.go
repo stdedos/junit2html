@@ -2,6 +2,6 @@ package example
 
 import "testing"
 
-func TestCoverage(t *testing.T) {
+func TestCoverage(_ *testing.T) {
 	foo()
 }
