@@ -1,4 +1,4 @@
-module github.com/or-shachar/junit2html
+module github.com/stdedos/junit2html
 
 go 1.19
 

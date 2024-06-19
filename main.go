@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	reporters "github.com/onsi/ginkgo/v2/reporters"
-	"github.com/alexec/junit2html/pkg/convert"
+	"github.com/stdedos/junit2html/pkg/convert"
 )
 
 // arguments

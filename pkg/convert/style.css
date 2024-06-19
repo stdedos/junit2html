@@ -94,19 +94,19 @@ div:target .expando {
     margin-top: 1rem;
     overflow: hidden;
 }
- 
+
 input[type=checkbox].hide-input:not(:checked) + .toggle-el {
     height: 0;
     opacity: 0;
     padding-top: 0;
     padding-bottom: 0;
 }
- 
+
 input.hide-input {
     position: absolute;
     left: -999em;
 }
- 
+
 label.toggle {
     display: block;
     cursor: pointer;
