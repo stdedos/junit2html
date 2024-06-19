@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/alexec/junit2html/pkg/convert"
 	reporters "github.com/onsi/ginkgo/v2/reporters"
-	"github.com/redhat-appstudio-qe/junit2html/pkg/convert"
 )
 
 func main() {

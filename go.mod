@@ -1,4 +1,4 @@
-module github.com/redhat-appstudio-qe/junit2html
+module github.com/alexec/junit2html
 
 go 1.19
 

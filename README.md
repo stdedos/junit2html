@@ -11,15 +11,44 @@ Convert Junit XML reports (`junit.xml`) into HTML reports using a single standal
 
 ![screenshot](screenshot.png)
 
-## Usage
+## Install
 
-### Build
+Like `jq`, `junit2html` is a tiny (8Mb) standalone binary. You can download it from the [releases page](https://github.com/kitproj/junit2html/releases/latest).
+
+If you're on MacOS, you can use `brew`:
 
 ```bash
-make build
+brew tap kitproj/junit2html --custom-remote https://github.com/kitproj/junit2html
+brew install junit2html
 ```
 
-### Run
+Otherwise, you can use `curl`:
+
 ```bash
-./junit2html < <junit-file.xml> > <output-report.html>
+curl -q https://raw.githubusercontent.com/kitproj/junit2html/main/install.sh | sh
+```
+
+## Usage
+
+Here is an example that uses trap to always created the test report:
+
+```bash
+go install github.com/alexec/junit2html@latest
+
+trap 'go-junit-report < test.out > junit.xml && junit2html < junit.xml > test-report.html' EXIT
+
+go test -v -cover ./... 2>&1 > test.out
+```
+
+💡 Don't use pipes (i.e. `|`) in shell, pipes swallow exit codes. Use `<` and `>` which is POSIX compliant.
+
+## Test
+
+How to test this locally:
+
+```bash
+cd examples/
+go test -v -cover ./... 2>&1 > test.out
+go-junit-report < test.out > junit.xml
+go run .. < junit.xml > test-report.html
 ```
