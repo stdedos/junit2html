@@ -17,10 +17,12 @@ import (
 // arguments
 var (
 	xmlReports *string
+	noFilename bool
 )
 
 func init() {
 	xmlReports = flag.String("xmlReports", "", "Comma delimited glob expressions describing the files to scan")
+	flag.BoolVar(&noFilename, "noFilename", false, "Do not print the filename of the suite")
 }
 
 func main() {

@@ -18,7 +18,14 @@ var styles string
 
 var output string
 
+// Convert is a ConvertFilename overload with an option to set noFilename.
 func Convert(suitesArray []*reporters.JUnitTestSuites, files []string) (string, error) {
+	return ConvertFilename(suitesArray, files, true)
+}
+
+// ConvertFilename converts JUnit XML report(s) to an HTML report.
+// revive:disable-next-line:exported // Yes, it is stuttering. It is a bit sad.
+func ConvertFilename(suitesArray []*reporters.JUnitTestSuites, files []string, noFilename bool) (string, error) {
 	output += "<html>"
 	output += "<head>"
 	output += "<meta charset=\"UTF-8\">"
@@ -29,7 +36,7 @@ func Convert(suitesArray []*reporters.JUnitTestSuites, files []string) (string, 
 
 	for idxSuite, suites := range suitesArray {
 		output += "<div class=\"suites\">"
-		if files[idxSuite] != STDIN {
+		if !noFilename && files[idxSuite] != STDIN {
 			output += fmt.Sprintf("<h3>Suite Filename</h3><span>%s</span>", files[idxSuite])
 		}
 		printTestSuites(suites)
