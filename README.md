@@ -47,7 +47,28 @@ go test -v -cover ./... 2>&1 > test.out
 How to test this locally:
 
 ```bash
+cd examples/
 go test -v -cover ./... 2>&1 > test.out
-go-junit-report < test.out > junit.xml 
-go run . < junit.xml > test-report.html 
+go-junit-report < test.out > junit.xml
+go run .. < junit.xml > test-report.html
 ```
+
+## Using glob patterns:
+
+Sometimes there is a need to parse multiple xml files and generate single html report.
+`junit2html` supports that by using standard [`glob` expression](https://pkg.go.dev/path/filepath#Glob).
+
+```bash
+# Explicit single file
+junit2html --xmlReports "reports/junit.xml" > report.html
+
+# Multiple files
+junit2html --xmlReports "reports/junit.xml,reports/coverage.xml" > report.html
+
+# Single glob pattern
+junit2html --xmlReports "reports/*.xml" > report.html
+
+# Multiple glob patterns
+junit2html --xmlReports "reports/junit*.xml,reports/coverage*.xml" > report.html
+``` 
+
