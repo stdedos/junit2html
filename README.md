@@ -15,7 +15,7 @@ Convert Junit XML reports (`junit.xml`) into HTML reports using a single standal
 
 ## Install
 
-Like `jq`, `junit2html` is a tiny (8Mb) standalone binary.
+Like `jq`, `junit2html` is a tiny (2.8Mb) standalone binary.
 
 You can download it from the [releases page](https://github.com/stdedos/junit2html/releases/latest).
 

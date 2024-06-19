@@ -1,3 +1,6 @@
+# Ignore the `go build` binary
+junit2html
+
 ## Verbatim copy from https://github.com/github/gitignore/blob/8779ee73af62c669e7ca371aaab8399d87127693/Go.gitignore
 
 # If you prefer the allow list template instead of the deny list, see community template:

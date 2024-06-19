@@ -115,9 +115,13 @@ func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestC
 		skipped.Message = re.ReplaceAllString(skipped.Message, "")
 		output += fmt.Sprintf("<div class='content'>%s</div>\n", skipped.Message)
 	}
+	if testCase.SystemOut != "" {
+		testCase.SystemOut = re.ReplaceAllString(testCase.SystemOut, "")
+		output += fmt.Sprintf("<div class='content'><b>Stdout:</b> \n\n%s</div>\n", testCase.SystemOut)
+	}
 	if testCase.SystemErr != "" {
 		testCase.SystemErr = re.ReplaceAllString(testCase.SystemErr, "")
-		output += fmt.Sprintf("<div class='content'><b>Log:</b> \n\n%s</div>\n", testCase.SystemErr)
+		output += fmt.Sprintf("<div class='content'><b>Stderr:</b> \n\n%s</div>\n", testCase.SystemErr)
 	}
 
 	output += "</div>\n"
