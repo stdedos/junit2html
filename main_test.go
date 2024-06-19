@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const DefaultReport = "example/junit.xml"
+const DefaultReport = "examples/junit.xml"
 
 func captureOutput(f func() error) (string, error) {
 	originalStdout := os.Stdout
@@ -54,7 +54,7 @@ func TestGlobPattern(t *testing.T) {
 		return
 	}
 
-	cmd := exec.Command(os.Args[0], "-test.run=TestMultiSuite", "-xmlReports=example/junit*.xml")
+	cmd := exec.Command(os.Args[0], "-test.run=TestMultiSuite", "-xmlReports=examples/junit*.xml")
 	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
 
 	stdoutPipe, err := cmd.StdoutPipe()
