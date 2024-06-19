@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="5" failures="2" skipped="1">
+	<testsuite name="github.com/alexec/junit2html/example" tests="4" failures="2" errors="0" id="0" hostname="stdedos-Precision-5560" skipped="1" time="0.004" timestamp="2024-06-19T13:39:17+03:00">
+		<testcase name="TestPassing" classname="github.com/alexec/junit2html/example" time="0.000">
+			<system-out><![CDATA[2024/06/19 13:39:10 ok]]></system-out>
+		</testcase>
+		<testcase name="TestFailing" classname="github.com/alexec/junit2html/example" time="0.000">
+			<failure message="Failed"><![CDATA[    example_test.go:10: this test failed]]></failure>
+		</testcase>
+		<testcase name="TestSkipped" classname="github.com/alexec/junit2html/example" time="0.000">
+			<skipped message="Skipped"><![CDATA[    example_test.go:14: this test is skipped]]></skipped>
+		</testcase>
+		<testcase name="TestPanic" classname="github.com/alexec/junit2html/example" time="0.000">
+			<failure message="Failed"></failure>
+		</testcase>
+		<system-out><![CDATA[panic: kaboom! [recovered]
+	panic: kaboom!
+
+goroutine 20 [running]:
+testing.tRunner.func1.2({0x54f520, 0x5b4d20})
+	/usr/lib/go-1.21/src/testing/testing.go:1545 +0x238
+testing.tRunner.func1()
+	/usr/lib/go-1.21/src/testing/testing.go:1548 +0x397
+panic({0x54f520?, 0x5b4d20?})
+	/usr/lib/go-1.21/src/runtime/panic.go:914 +0x21f
+github.com/alexec/junit2html/example.kaboom(...)
+	/home/stdedos/Documents/WorkBulk/Ubuntu/repos/A_STORAGE/junit2html/example/example.go:10
+github.com/alexec/junit2html/example.TestPanic(0x0?)
+	/home/stdedos/Documents/WorkBulk/Ubuntu/repos/A_STORAGE/junit2html/example/example_test.go:18 +0x49
+testing.tRunner(0xc0001949c0, 0x58a580)
+	/usr/lib/go-1.21/src/testing/testing.go:1595 +0xff
+created by testing.(*T).Run in goroutine 1
+	/usr/lib/go-1.21/src/testing/testing.go:1648 +0x3ad]]></system-out>
+	</testsuite>
+	<testsuite name="github.com/alexec/junit2html/example/coverage" tests="1" failures="0" errors="0" id="1" hostname="stdedos-Precision-5560" time="0.002" timestamp="2024-06-19T13:39:17+03:00">
+		<properties>
+			<property name="coverage.statements.pct" value="50.00"></property>
+		</properties>
+		<testcase name="TestCoverage" classname="github.com/alexec/junit2html/example/coverage" time="0.000">
+			<system-out><![CDATA[2024/06/19 13:39:10 foo]]></system-out>
+		</testcase>
+	</testsuite>
+</testsuites>
