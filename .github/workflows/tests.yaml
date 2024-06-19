@@ -40,11 +40,11 @@ jobs:
         run: go mod tidy
 
       - name: Run tests
-        continue-on-error: true
         run: go test $(go list ./... | grep -v /junit2html/example) -race -coverprofile=coverage.out
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
+        if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.os }},go${{ steps.go_version.outputs.version }}
