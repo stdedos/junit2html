@@ -1,5 +1,7 @@
 # junit2html
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/stdedos/junit2html/main.svg)](https://results.pre-commit.ci/latest/github/stdedos/junit2html/main)
+
 Convert Junit XML reports (`junit.xml`) into HTML reports using a single standalone binary.
 
 * Standalone binary.
@@ -13,14 +15,9 @@ Convert Junit XML reports (`junit.xml`) into HTML reports using a single standal
 
 ## Install
 
-Like `jq`, `junit2html` is a tiny (8Mb) standalone binary. You can download it from the [releases page](https://github.com/stdedos/junit2html/releases/latest).
+Like `jq`, `junit2html` is a tiny (8Mb) standalone binary.
 
-If you're on MacOS, you can use `brew`:
-
-```bash
-brew tap stdedos/junit2html --custom-remote https://github.com/stdedos/junit2html
-brew install junit2html
-```
+You can download it from the [releases page](https://github.com/stdedos/junit2html/releases/latest).
 
 Otherwise, you can use the installation script:
 https://raw.githubusercontent.com/stdedos/junit2html/main/install.sh

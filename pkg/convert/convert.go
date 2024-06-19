@@ -76,7 +76,7 @@ func printTestSuites(suites *reporters.JUnitTestSuites) {
 
 func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestCase) {
 	// regexp for replacing HTML tags in the log
-	re := regexp.MustCompile(`<\/?[^>]+(>|$)`)
+	re := regexp.MustCompile(`</?[^>]+(>|$)`)
 	id := fmt.Sprintf("%s.%s.%s", testSuite.Name, testCase.Classname, testCase.Name)
 	class, text := "passed", "Pass"
 	failure := testCase.Failure
@@ -100,17 +100,18 @@ func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestC
 
 	d := time.Duration(testCase.Time * float64(time.Second)).Round(time.Second)
 	output += fmt.Sprintf("<p class='duration' title='Test duration'>Test duration: %v</p>\n", d)
-	if tcError != nil {
+	switch {
+	case tcError != nil:
 		tcError.Message = re.ReplaceAllString(tcError.Message, "")
 		tcError.Description = re.ReplaceAllString(tcError.Description, "")
 		output += fmt.Sprintf("<div class='content'><b>Error message:</b> \n\n%s</div>\n", tcError.Message)
 		output += fmt.Sprintf("<div class='content'><b>Error description:</b> \n\n%s</div>\n", tcError.Description)
-	} else if failure != nil {
+	case failure != nil:
 		failure.Message = re.ReplaceAllString(failure.Message, "")
 		failure.Description = re.ReplaceAllString(failure.Description, "")
 		output += fmt.Sprintf("<div class='content'><b>Failure message:</b> \n\n%s</div>\n", failure.Message)
 		output += fmt.Sprintf("<div class='content'><b>Failure description:</b> \n\n%s</div>\n", failure.Description)
-	} else if skipped != nil {
+	case skipped != nil:
 		skipped.Message = re.ReplaceAllString(skipped.Message, "")
 		output += fmt.Sprintf("<div class='content'>%s</div>\n", skipped.Message)
 	}
@@ -133,7 +134,6 @@ func printSuiteHeader(s reporters.JUnitTestSuite) {
 				output += fmt.Sprintf("<span class='coverage' title='%s'>%.0f%%</span>\n", p.Name, v)
 			}
 		}
-
 	}
 	output += "</h4>"
 }

@@ -1,9 +1,23 @@
 package example
 
-import "testing"
+import (
+	"bytes"
+	"log"
+	"os"
+	"testing"
+)
 
 func TestPassing(t *testing.T) {
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
 	ok()
+	if buf.String() != "ok\n" {
+		t.Errorf("unexpected output: %q", buf.String())
+	}
 }
 
 func TestFailing(t *testing.T) {
@@ -16,4 +30,5 @@ func TestSkipped(t *testing.T) {
 
 func TestPanic(t *testing.T) {
 	kaboom()
+	t.Errorf("The code did not panic")
 }

@@ -1,0 +1,125 @@
+run:
+  timeout: 10m
+
+linters:
+  fast: false
+  enable:
+    - revive
+    - unparam
+    - wastedassign
+    - exhaustive
+    - mnd
+    - gofumpt
+    - stylecheck
+    - prealloc
+    - gocritic
+    - importas
+
+linters-settings:
+  govet:
+    shadow: true
+  importas:
+    no-unaliased: true
+  gocritic:
+    enabled-checks:
+      # first default checks
+      - appendAssign
+      - argOrder
+      - assignOp
+      - badCall
+      - badCond
+      - captLocal
+      - caseOrder
+      - codegenComment
+      # - commentFormatting # conflict with gofumpt and --fix
+      - defaultCaseOrder
+      - deprecatedComment
+      - dupArg
+      - dupBranchBody
+      - dupCase
+      - dupSubExpr
+      - elseif
+      - exitAfterDefer
+      - flagDeref
+      - flagName
+      - ifElseChain
+      - mapKey
+      - newDeref
+      - offBy1
+      - regexpMust
+      - singleCaseSwitch
+      - sloppyLen
+      - sloppyTypeAssert
+      - switchTrue
+      - typeSwitchVar
+      - underef
+      - unlambda
+      - unslice
+      - valSwap
+      - wrapperFunc
+      # non-defaults
+      # perf
+      - appendCombine
+      - equalFold
+      - indexAlloc
+      - preferDecodeRune
+      - preferFprint
+      - preferStringWriter
+      - preferWriteByte
+      - rangeExprCopy
+      - sliceClear
+      - stringXbytes
+      # style
+      - boolExprSimplify
+      - commentedOutImport
+      - deferUnlambda
+      - emptyStringTest
+      - hexLiteral
+      - httpNoBody
+      - importShadow
+      - initClause
+      - methodExprCall
+      - preferFilepathJoin
+      - ptrToRefParam
+      - redundantSprint
+      - regexpSimplify
+      - stringConcatSimplify
+      - timeExprSimplify
+      - typeDefFirst
+      - typeUnparen
+      - unlabelStmt
+      - unnecessaryBlock
+      - yodaStyleExpr
+      # diagnostics
+      - badLock
+      - badRegexp
+      - builtinShadowDecl
+      - emptyDecl
+      - evalOrder
+      - externalErrorReassign
+      - filepathJoin
+      - nilValReturn
+      - regexpPattern
+      - returnAfterHttpError
+      - sloppyReassign
+      - sortSlice
+      - sprintfQuotedString
+      - sqlQuery
+      - syncMapLoadAndDelete
+      - truncateCmp
+      - unnecessaryDefer
+      - weakCond
+
+issues:
+  exclude-dirs:
+    - example/
+  exclude-rules:
+    - linters:
+        - govet
+      text: 'shadow: declaration of "err" shadows declaration at'
+
+severity:
+  default-severity: Major
+
+output:
+  uniq-by-line: false
