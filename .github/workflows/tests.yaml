@@ -40,17 +40,7 @@ jobs:
         run: go mod tidy
 
       - name: Run tests
-        # ToDo: Why is TestMainStdinCanBeXMLReports so special?
-        run: |
-          go test $(go list ./... | grep -v /junit2html/example) -race -coverprofile=coverage.out -skip '^\QTestMainStdinCanBeXMLReports\E$'
-          go test -test.run '^\QTestMainStdinCanBeXMLReports\E$'
-
-      - name: Notice if testing would work without -skip
-        run: |
-          if go test $(go list ./... | grep -v /junit2html/example) ; then
-            echo "Testing would work without -skip!"
-            exit 1
-          fi
+        run: go test $(go list ./... | grep -v /junit2html/example) -race -coverprofile=coverage.out
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
