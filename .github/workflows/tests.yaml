@@ -47,6 +47,6 @@ jobs:
         uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3
         if: always()
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.os }},go${{ steps.go_version.outputs.version }}
           fail_ci_if_error: ${{ github.repository_owner == 'stdedos' && 'true' || 'false' }}
+          version: v0.2.0
