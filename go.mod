@@ -3,7 +3,7 @@ module github.com/stdedos/junit2html
 go 1.19
 
 require (
-	github.com/onsi/ginkgo/v2 v2.13.0
+	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/stretchr/testify v1.9.0
 )
 
