@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: go mod tidy
 
-    - uses: pre-commit/action@v3.0.1
+    - uses: pre-commit/action@f7acafac0271bdd064cdfa1b13f17b4350e565ed # v3.0.1
 
-    - uses: pre-commit-ci/lite-action@v1.0.2
+    - uses: pre-commit-ci/lite-action@9d882e7a565f7008d4faf128f27d1cb6503d4ebf # v1.0.2
       if: always()
