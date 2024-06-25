@@ -23,7 +23,7 @@ jobs:
       - name: Read Go version from go.mod
         run: echo "CI_GO_VERSION=$(grep '^go ' go.mod | awk '{print $2}')" >> "${GITHUB_ENV}"
 
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.CI_GO_VERSION }}
           cache: true
