@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/stdedos/junit2html/pkg/logging"
@@ -50,7 +52,7 @@ func Suites(files []string) []*reporters.JUnitTestSuites {
 		var testResult io.Reader
 
 		if f == convert.STDIN {
-			err := isStdinPiped()
+			err := isStdinRedirectedOrPiped()
 			if err != nil {
 				panic(err)
 			}
@@ -61,7 +63,7 @@ func Suites(files []string) []*reporters.JUnitTestSuites {
 
 			res, err := os.ReadFile(f)
 			if err != nil {
-				panic(err)
+				panic(fmt.Errorf("error reading file: %w", err))
 			}
 			testResult = bytes.NewReader(res)
 		}
@@ -69,7 +71,7 @@ func Suites(files []string) []*reporters.JUnitTestSuites {
 		fileSuites := &reporters.JUnitTestSuites{}
 		err := xml.NewDecoder(testResult).Decode(fileSuites)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("error decoding xml: %w", err))
 		}
 
 		suites = append(suites, fileSuites)
@@ -78,17 +80,26 @@ func Suites(files []string) []*reporters.JUnitTestSuites {
 	return suites
 }
 
-const NoDataPipedError = "no data piped in"
+const NoDataPipedError = "no data received from stdin"
 
-func isStdinPiped() error {
+func isStdinRedirectedOrPiped() error {
 	fi, err := os.Stdin.Stat()
 	if err != nil {
 		return err
 	}
 
-	if fi.Mode()&os.ModeNamedPipe == 0 {
-		return errors.New(NoDataPipedError)
+	logging.Logger.Debug("      Stdin mode", "mode", strconv.FormatInt(int64(fi.Mode()), 2))
+	logging.Logger.Debug("os.ModeNamedPipe", "mode", strconv.FormatInt(int64(os.ModeNamedPipe), 2))
+
+	// Redirected data is some kind of file (or bash-here document)
+	if fi.Mode().IsRegular() {
+		return nil
 	}
 
-	return nil
+	// cat file | junit2html
+	if fi.Mode()&os.ModeNamedPipe != 0 {
+		return nil
+	}
+
+	return errors.New(NoDataPipedError)
 }
