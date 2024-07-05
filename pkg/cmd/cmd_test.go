@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"log/slog"
 	"strings"
 	"testing"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/stdedos/junit2html/pkg/logging"
 	"github.com/stdedos/junit2html/pkg/utils"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/slog"
 )
 
 const (

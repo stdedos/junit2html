@@ -25,7 +25,7 @@ func Files(inputFiles []string) []string {
 
 	var files []string
 	for _, p := range inputFiles {
-		logging.Logger.Debug("Given argument: '%s'\n", p)
+		logging.Logger.Debug("Given argument", "argument", p)
 
 		matches, err := filepath.Glob(p)
 		if err != nil {
@@ -57,7 +57,7 @@ func Suites(files []string) []*reporters.JUnitTestSuites {
 
 			testResult = os.Stdin
 		} else {
-			logging.Logger.Debug("Parsing file '%s'\n", f)
+			logging.Logger.Debug("Parsing file", "file", f)
 
 			res, err := os.ReadFile(f)
 			if err != nil {
