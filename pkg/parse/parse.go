@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/stdedos/junit2html/pkg/logging"
 
@@ -19,15 +18,14 @@ import (
 
 const ErrNoFiles = "no files found with given pattern(s)"
 
-func Files(xmlFiles string) []string {
-	if xmlFiles == "" {
+func Files(inputFiles []string) []string {
+	if len(inputFiles) == 0 {
 		return []string{convert.STDIN}
 	}
 
 	var files []string
-	patterns := strings.Split(xmlFiles, ",")
-	for _, p := range patterns {
-		logging.Logger.Debug("Given xmlReports argument: '%s'\n", p)
+	for _, p := range inputFiles {
+		logging.Logger.Debug("Given argument: '%s'\n", p)
 
 		matches, err := filepath.Glob(p)
 		if err != nil {

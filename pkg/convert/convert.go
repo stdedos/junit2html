@@ -11,14 +11,19 @@ import (
 	reporters "github.com/onsi/ginkgo/v2/reporters"
 )
 
-const STDIN = "/dev/stdin"
+const (
+	STDIN          = "/dev/stdin"
+	SuitesStartDiv = "<div class=\"suites\">"
+)
 
 //go:embed style.css
 var styles string
 
+// XXX: That is really not scalable, and it does interfere with the tests.
 var output string
 
 func Convert(suitesArray []*reporters.JUnitTestSuites, files []string) (string, error) {
+	output = ""
 	output += "<html>"
 	output += "<head>"
 	output += "<meta charset=\"UTF-8\">"
@@ -28,7 +33,7 @@ func Convert(suitesArray []*reporters.JUnitTestSuites, files []string) (string, 
 	output += "<h1>Test Results</h1>"
 
 	for idxSuite, suites := range suitesArray {
-		output += "<div class=\"suites\">"
+		output += SuitesStartDiv
 		if files[idxSuite] != STDIN {
 			output += fmt.Sprintf("<h3>Suite Filename</h3><span>%s</span>", files[idxSuite])
 		}

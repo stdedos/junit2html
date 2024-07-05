@@ -13,27 +13,32 @@ func TestFiles(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		xmlFiles string
+		xmlFiles []string
 		want     []string
 	}{
 		{
+			name:     "nil input",
+			xmlFiles: nil,
+			want:     []string{convert.STDIN},
+		},
+		{
 			name:     "empty input",
-			xmlFiles: "",
+			xmlFiles: []string{},
 			want:     []string{convert.STDIN},
 		},
 		{
 			name:     "single file",
-			xmlFiles: "parse_test_1.xml",
+			xmlFiles: []string{"parse_test_1.xml"},
 			want:     []string{"parse_test_1.xml"},
 		},
 		{
 			name:     "multiple files",
-			xmlFiles: "parse_test_1.xml,parse_test_2.xml",
+			xmlFiles: []string{"parse_test_1.xml", "parse_test_2.xml"},
 			want:     []string{"parse_test_1.xml", "parse_test_2.xml"},
 		},
 		{
 			name:     "glob pattern",
-			xmlFiles: "*.xml",
+			xmlFiles: []string{"*.xml"},
 			want:     []string{"parse_test_1.xml", "parse_test_2.xml"},
 		},
 	}
@@ -49,10 +54,10 @@ func TestFilesErrorConditions(t *testing.T) {
 	t.Parallel()
 
 	assert.PanicsWithError(t, ErrNoFiles, func() {
-		Files("non-existent-file.xml")
+		Files([]string{"non-existent-file.xml"})
 	})
 
 	assert.PanicsWithError(t, filepath.ErrBadPattern.Error(), func() {
-		Files("[-]")
+		Files([]string{"[-]"})
 	})
 }

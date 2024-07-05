@@ -3,33 +3,22 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
 
+	"github.com/stdedos/junit2html/pkg/cmd"
+	"github.com/stdedos/junit2html/pkg/utils"
+	"github.com/stretchr/testify/require"
+
 	"github.com/stretchr/testify/assert"
 )
 
 const DefaultReport = "examples/junit.xml"
 
-func captureOutput(f func() error) (string, error) {
-	originalStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-	defer func() { os.Stdin = originalStdout }()
-	funcErr := f()
-	err := w.Close()
-	if err != nil {
-		return "", err
-	}
-	out, _ := io.ReadAll(r)
-	return string(out), funcErr
-}
-
-func TestMainFunction(t *testing.T) {
+func TestMainFunctionViaPipe(t *testing.T) {
 	var err error
 
 	originalStdin := os.Stdin
@@ -37,8 +26,10 @@ func TestMainFunction(t *testing.T) {
 	os.Stdin, err = os.Open(DefaultReport)
 	assert.Nil(t, err)
 
-	output, err := captureOutput(func() error {
-		main()
+	output, _, err := utils.CaptureOutput(func() error {
+		// Instead of main, and to avoid playing with arguments,
+		// we call the entry point directly.
+		cmd.EntryPoint([]string{})
 		return nil
 	})
 
@@ -46,87 +37,47 @@ func TestMainFunction(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// TestRunMain is a test helper to run the main function.
-// Inspiration: https://go.dev/talks/2014/testing.slide#23
-func TestRunMain(_ *testing.T) {
+// TestMainIsWorking is a test that is used to test the main function.
+// Executing a process and passing arguments in Golang is an ordeal;
+// We will settle for a simple PoC test (`--help` is passed along).
+func TestMainAcceptsArgs(t *testing.T) {
+	// Inspiration: https://go.dev/talks/2014/testing.slide#23
 	if os.Getenv("BE_CRASHER") == "1" {
+		os.Args[1] = "--help"
 		main()
 		return
 	}
-}
 
-func TestGlobPattern(t *testing.T) {
-	cmd := exec.Command(os.Args[0], "-test.run=TestRunMain", "-xmlReports=examples/junit*.xml")
-	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+	proc := exec.Command(os.Args[0], "-test.run=TestMainAcceptsArgs")
+	proc.Env = append(os.Environ(), "BE_CRASHER=1")
 
-	stdoutPipe, err := cmd.StdoutPipe()
-	if err != nil {
-		t.Fatalf("Failed to get stdout pipe: %v", err)
-	}
+	stdoutPipe, err := proc.StdoutPipe()
+	require.Nil(t, err, "Failed to get stdout pipe: %v", err)
 
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		t.Fatalf("Failed to get stderr pipe: %v", err)
-	}
+	stderrPipe, err := proc.StderrPipe()
+	require.Nil(t, err, "Failed to get stderr pipe: %v", err)
 
-	err = cmd.Start()
-	assert.Nil(t, err)
+	err = proc.Start()
+	require.Nil(t, err)
 
 	var stdoutBuf, stderrBuf bytes.Buffer
 	_, err = io.Copy(&stdoutBuf, stdoutPipe)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
+	require.Nil(t, err, "Failed to read stdout: %v", err)
+
 	_, err = io.Copy(&stderrBuf, stderrPipe)
-	if err != nil {
-		t.Fatalf("Failed to read stderr: %v", err)
-	}
+	require.Nil(t, err, "Failed to read stderr: %v", err)
 
 	var e *exec.ExitError
 	if errors.As(err, &e) && !e.Success() {
-		t.Fatalf("process ran with err %v, want exit status 0", err)
+		require.Nil(t, err, "process ran with err %v, want exit status 0", err)
 	}
 
-	assert.Equal(t, strings.Count(stdoutBuf.String(), "class=\"suites\""), 1)
-	// 1 argument, 1 files (glob returns 1 file), 1 trailing newline
-	assert.Equal(t, len(strings.Split(stderrBuf.String(), "\n")), 3)
-}
+	stdoutStr := stdoutBuf.String()
+	// We asked for help - but it is a bit hard to assert the exact output.
+	// Let's settle for a few guesses.
+	assert.GreaterOrEqual(t, len(strings.Split(stdoutStr, "\n")), 10, "Help output heuristic failed: %s", stdoutStr)
+	assert.True(t, strings.HasPrefix(stdoutStr, "Usage:"), "Help output heuristic failed: %s", stdoutStr)
+	assert.True(t, strings.Contains(stdoutStr, "Help Options:"), "Help output heuristic failed: %s", stdoutStr)
 
-func TestMultiSuite(t *testing.T) {
-	xmlReportsArg := fmt.Sprintf("-xmlReports=%s,%s", DefaultReport, DefaultReport)
-
-	cmd := exec.Command(os.Args[0], "-test.run=TestRunMain", xmlReportsArg)
-	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
-
-	stdoutPipe, err := cmd.StdoutPipe()
-	if err != nil {
-		t.Fatalf("Failed to get stdout pipe: %v", err)
-	}
-
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		t.Fatalf("Failed to get stderr pipe: %v", err)
-	}
-
-	err = cmd.Start()
-	assert.Nil(t, err)
-
-	var stdoutBuf, stderrBuf bytes.Buffer
-	_, err = io.Copy(&stdoutBuf, stdoutPipe)
-	if err != nil {
-		t.Fatalf("Failed to read stdout: %v", err)
-	}
-	_, err = io.Copy(&stderrBuf, stderrPipe)
-	if err != nil {
-		t.Fatalf("Failed to read stderr: %v", err)
-	}
-
-	var e *exec.ExitError
-	if errors.As(err, &e) && !e.Success() {
-		t.Fatalf("process ran with err %v, want exit status 0", err)
-	}
-
-	assert.Equal(t, strings.Count(stdoutBuf.String(), "class=\"suites\""), 2)
-	// 2 arguments (as CSV), 2 files (no glob involved), 1 trailing newline
-	assert.Equal(t, len(strings.Split(stderrBuf.String(), "\n")), 5)
+	assert.Equal(t, stderrBuf.String(), "")
 }
