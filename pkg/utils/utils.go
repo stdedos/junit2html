@@ -10,7 +10,7 @@ func CaptureOutput(f func() error) (string, string, error) {
 	originalStdout := os.Stdout
 	rOut, wOut, _ := os.Pipe()
 	os.Stdout = wOut
-	defer func() { os.Stdin = originalStdout }()
+	defer func() { os.Stdout = originalStdout }()
 
 	originalStderr := os.Stderr
 	rErr, wErr, _ := os.Pipe()
