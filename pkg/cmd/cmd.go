@@ -29,7 +29,11 @@ func EntryPoint(args []string) {
 	}
 
 	if opts.Verbose != nil || opts.Quiet != nil {
-		logging.ModifyVerbosity(len(opts.Quiet) - len(opts.Verbose))
+		by := len(opts.Quiet) - len(opts.Verbose)
+
+		if by != 0 {
+			logging.ModifyVerbosity(by)
+		}
 	}
 
 	files := parse.Files(positionalArgs)

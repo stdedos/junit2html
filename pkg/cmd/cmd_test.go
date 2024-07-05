@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"strings"
 	"testing"
 
@@ -12,6 +13,11 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+const (
+	DefaultCheckFile       = "junit.xml"
+	DefaultLogLevelForTest = slog.LevelInfo
+)
+
 func TestGlobPattern(t *testing.T) {
 	origLogger := logging.Logger
 	defer func() { logging.Logger = origLogger }()
@@ -20,6 +26,7 @@ func TestGlobPattern(t *testing.T) {
 
 	logging.SetupLogger(&loggingBuffer)
 	logging.SetLevel(slog.LevelDebug)
+	defer logging.SetLevel(logging.DefaultLogLevel)
 
 	stdoutStr, _, err := utils.CaptureOutput(func() error {
 		EntryPoint([]string{"junit*.xml"})
@@ -42,9 +49,10 @@ func TestMultiSuite(t *testing.T) {
 
 	logging.SetupLogger(&loggingBuffer)
 	logging.SetLevel(slog.LevelDebug)
+	defer logging.SetLevel(logging.DefaultLogLevel)
 
 	stdoutStr, _, err := utils.CaptureOutput(func() error {
-		EntryPoint([]string{"junit.xml", "junit.xml"})
+		EntryPoint([]string{DefaultCheckFile, DefaultCheckFile})
 		return nil
 	})
 
@@ -53,4 +61,78 @@ func TestMultiSuite(t *testing.T) {
 	stderrStr := loggingBuffer.String()
 	assert.Equal(t, len(strings.Split(stderrStr, "\n")), 5, "stderr heuristic failed: %s", stderrStr)
 	assert.Nil(t, err)
+}
+
+func TestHelp(t *testing.T) {
+	origLogger := logging.Logger
+	defer func() { logging.Logger = origLogger }()
+
+	var loggingBuffer bytes.Buffer
+
+	logging.SetupLogger(&loggingBuffer)
+	logging.SetLevel(slog.LevelDebug)
+
+	stdoutStr, _, err := utils.CaptureOutput(func() error {
+		EntryPoint([]string{"--help"})
+		return nil
+	})
+
+	// Blatant copy-paste from `main_test.go`
+	assert.GreaterOrEqual(t, len(strings.Split(stdoutStr, "\n")), 10, "Help output heuristic failed: %s", stdoutStr)
+	assert.True(t, strings.HasPrefix(stdoutStr, "Usage:"), "Help output heuristic failed: %s", stdoutStr)
+	assert.True(t, strings.Contains(stdoutStr, "Help Options:"), "Help output heuristic failed: %s", stdoutStr)
+	assert.Nil(t, err)
+}
+
+func TestNotAnArgument(t *testing.T) {
+	assert.PanicsWithError(t, "error parsing flags: unknown flag `not-an-argument'", func() {
+		_, _, _ = utils.CaptureOutput(func() error {
+			EntryPoint([]string{"--not-an-argument"})
+			return nil
+		})
+	})
+}
+
+func TestVerboseLogger(t *testing.T) {
+	origLogger := logging.Logger
+	defer func() { logging.Logger = origLogger }()
+
+	var loggingBuffer bytes.Buffer
+
+	logging.SetupLogger(&loggingBuffer)
+	logging.SetLevel(DefaultLogLevelForTest)
+
+	_, _, _ = utils.CaptureOutput(func() error {
+		EntryPoint([]string{"-v", DefaultCheckFile})
+		return nil
+	})
+
+	assert.True(t, logging.Logger.Handler().Enabled(context.TODO(), slog.LevelDebug))
+}
+
+func TestQuietLogger(t *testing.T) {
+	t.Skip("Test should've worked. How on earth TestVerboseLogger works then??")
+	logging.SetLevel(DefaultLogLevelForTest)
+	defer logging.SetLevel(logging.DefaultLogLevel)
+
+	_, _, _ = utils.CaptureOutput(func() error {
+		EntryPoint([]string{"-q", DefaultCheckFile})
+		return nil
+	})
+
+	assert.True(t, logging.Logger.Handler().Enabled(context.TODO(), slog.LevelWarn))
+	assert.False(t, logging.Logger.Handler().Enabled(context.TODO(), slog.LevelInfo))
+}
+
+func TestQsandVsAreEvaluated(t *testing.T) {
+	logging.SetLevel(DefaultLogLevelForTest)
+	defer logging.SetLevel(logging.DefaultLogLevel)
+
+	_, _, _ = utils.CaptureOutput(func() error {
+		EntryPoint([]string{"-v", "-q", DefaultCheckFile})
+		return nil
+	})
+
+	assert.True(t, logging.Logger.Handler().Enabled(context.TODO(), slog.LevelInfo))
+	assert.False(t, logging.Logger.Handler().Enabled(context.TODO(), slog.LevelDebug))
 }

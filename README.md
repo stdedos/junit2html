@@ -1,7 +1,5 @@
 # junit2html
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/stdedos/junit2html/main.svg)](https://results.pre-commit.ci/latest/github/stdedos/junit2html/main)
-
 Convert Junit XML reports (`junit.xml`) into HTML reports using a single standalone binary.
 
 * Standalone binary.

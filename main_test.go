@@ -37,9 +37,9 @@ func TestMainFunctionViaPipe(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// TestMainIsWorking is a test that is used to test the main function.
+// TestMainIsWorking is used to test the main function.
 // Executing a process and passing arguments in Golang is an ordeal;
-// We will settle for a simple PoC test (`--help` is passed along).
+// we will settle for a simple PoC test (`--help` is passed along).
 func TestMainAcceptsArgs(t *testing.T) {
 	// Inspiration: https://go.dev/talks/2014/testing.slide#23
 	if os.Getenv("BE_CRASHER") == "1" {
