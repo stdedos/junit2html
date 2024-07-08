@@ -38,7 +38,7 @@ func TestGlobPattern(t *testing.T) {
 
 	// 1 argument, 1 file (glob returns 1 file), 1 trailing newline.
 	stderrStr := loggingBuffer.String()
-	assert.Equal(t, len(strings.Split(stderrStr, "\n")), 3, "stderr heuristic failed: %s", stderrStr)
+	assert.Equal(t, len(strings.Split(stderrStr, "\n")), 4, "stderr heuristic failed: %s", stderrStr)
 }
 
 func TestMultiSuite(t *testing.T) {
@@ -59,7 +59,7 @@ func TestMultiSuite(t *testing.T) {
 	assert.Equal(t, strings.Count(stdoutStr, convert.SuitesStartDiv), 2, "stdout heuristic failed: %s", stdoutStr)
 	// 2 arguments (as CSV), 2 files (no glob involved), 1 trailing newline.
 	stderrStr := loggingBuffer.String()
-	assert.Equal(t, len(strings.Split(stderrStr, "\n")), 5, "stderr heuristic failed: %s", stderrStr)
+	assert.Equal(t, len(strings.Split(stderrStr, "\n")), 7, "stderr heuristic failed: %s", stderrStr)
 	assert.Nil(t, err)
 }
 

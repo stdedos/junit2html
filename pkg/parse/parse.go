@@ -1,14 +1,18 @@
 package parse
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
+	"unicode/utf8"
+
+	"github.com/stdedos/junit2html/pkg/utils"
 
 	"github.com/stdedos/junit2html/pkg/logging"
 
@@ -17,6 +21,19 @@ import (
 )
 
 const ErrNoFiles = "no files found with given pattern(s)"
+
+var (
+	fileKindTestSuite  = regexp.MustCompile(`<testsuite .$`)
+	fileKindTestSuites = regexp.MustCompile(`<testsuites $`)
+)
+
+type kindOfInputT int
+
+const (
+	None kindOfInputT = iota
+	JUnitTestSuite
+	JUnitTestSuites
+)
 
 func Files(inputFiles []string) []string {
 	if len(inputFiles) == 0 {
@@ -45,37 +62,115 @@ func Files(inputFiles []string) []string {
 }
 
 func Suites(files []string) []*reporters.JUnitTestSuites {
+	kindOfInput := None
 	suites := make([]*reporters.JUnitTestSuites, 0, len(files))
+
 	for _, f := range files {
-		var testResult io.Reader
+		var err error
+		var testData []byte
+		var fileSuites *reporters.JUnitTestSuites
 
 		if f == convert.STDIN {
-			err := isStdinRedirectedOrPiped()
+			err = isStdinRedirectedOrPiped()
 			if err != nil {
 				panic(err)
 			}
 
-			testResult = os.Stdin
+			testData, err = os.ReadFile(os.Stdin.Name())
+			if err != nil {
+				panic(fmt.Errorf("error reading stdin: %w", err))
+			}
 		} else {
 			logging.Logger.Debug("Parsing file", "file", f)
 
-			res, err := os.ReadFile(f)
+			testData, err = os.ReadFile(f)
 			if err != nil {
 				panic(fmt.Errorf("error reading file: %w", err))
 			}
-			testResult = bytes.NewReader(res)
 		}
 
-		fileSuites := &reporters.JUnitTestSuites{}
-		err := xml.NewDecoder(testResult).Decode(fileSuites)
-		if err != nil {
-			panic(fmt.Errorf("error decoding xml: %w", err))
+		fileKindHint := detectFileKindHint(&testData)
+
+		switch {
+		case fileKindTestSuites.MatchString(fileKindHint):
+			kindOfInput = uniqueInterface(kindOfInput, JUnitTestSuites)
+			fileSuites = readJUnitTestSuites(&testData)
+		case fileKindTestSuite.MatchString(fileKindHint):
+			kindOfInput = uniqueInterface(kindOfInput, JUnitTestSuite)
+			fileSuites = readJUnitTestSuite(&testData)
+		default:
+			panic(fmt.Errorf("unknown file kind: %s", fileKindHint))
 		}
 
 		suites = append(suites, fileSuites)
 	}
 
 	return suites
+}
+
+// detectFileKindHint reads until `/<testsuite(s | .)$/`, and returns the file kind hint.
+func detectFileKindHint(testResult *[]byte) string {
+	reader := bufio.NewReader(bytes.NewReader(*testResult))
+
+	fileKindBytes, err := utils.ReadUntilToken(reader, []byte("<testsuite"))
+	if err != nil {
+		panic(fmt.Errorf("error probing file: %w", err))
+	}
+
+	// Get maybe `s `, or ` X`, to finalize the `<testsuite` tag
+	// (either as `<testsuites `, or `<testsuite X` - where X we don't care)
+	nextRune, _, err := reader.ReadRune()
+	if err != nil || nextRune == utf8.RuneError {
+		panic(fmt.Errorf("error reading rune: %w", err))
+	}
+	fileKindBytes = utf8.AppendRune(fileKindBytes, nextRune)
+	nextRune, _, err = reader.ReadRune()
+	if err != nil || nextRune == utf8.RuneError {
+		panic(fmt.Errorf("error reading rune: %w", err))
+	}
+	fileKindBytes = utf8.AppendRune(fileKindBytes, nextRune)
+
+	fileKind := string(fileKindBytes)
+	logging.Logger.Debug("XML file kind", "kind", fileKind)
+
+	return fileKind
+}
+
+func readJUnitTestSuites(testResult *[]byte) *reporters.JUnitTestSuites {
+	fileSuites := &reporters.JUnitTestSuites{}
+	err := xml.NewDecoder(bytes.NewReader(*testResult)).Decode(fileSuites)
+	if err != nil {
+		panic(fmt.Errorf("error decoding xml: %w", err))
+	}
+	return fileSuites
+}
+
+func readJUnitTestSuite(testResult *[]byte) *reporters.JUnitTestSuites {
+	suite := &reporters.JUnitTestSuite{}
+	err := xml.NewDecoder(bytes.NewReader(*testResult)).Decode(suite)
+	if err != nil {
+		panic(fmt.Errorf("error decoding xml: %w", err))
+	}
+
+	junitReport := reporters.JUnitTestSuites{
+		Tests:      suite.Tests,
+		Disabled:   suite.Disabled + suite.Skipped,
+		Errors:     suite.Errors,
+		Failures:   suite.Failures,
+		Time:       suite.Time,
+		TestSuites: []reporters.JUnitTestSuite{*suite},
+	}
+
+	return &junitReport
+}
+
+// uniqueInterface panics if the new interface is different from the established one
+func uniqueInterface(established kindOfInputT, new kindOfInputT) kindOfInputT {
+	if established != None && established != new {
+		panic(fmt.Errorf("mixed input types: %v and %v", established, new))
+	}
+
+	return new
 }
 
 const NoDataPipedError = "no data received from stdin"
