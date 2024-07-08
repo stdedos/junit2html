@@ -22,6 +22,7 @@ import (
 const (
 	SeedEnvKey       = "JUNIT2HTML_FILE_TEST_SEED"
 	NoDisableLogging = "JUNIT2HTML_NO_DISABLE_LOGGING"
+	SnapshotsDir     = "__snapshots__"
 )
 
 var testRand *rand.Rand
@@ -73,7 +74,7 @@ func TestSnapshots(t *testing.T) {
 		wd := entry
 
 		t.Run(wd.Name(), func(tt *testing.T) {
-			tt.Parallel()
+			snapshotsDir := "./" + wd.Name() + "/" + SnapshotsDir
 
 			files, err := inputAsGlobOrLiterally(wd)
 			assert.Nil(tt, err)
@@ -90,7 +91,10 @@ func TestSnapshots(t *testing.T) {
 			})
 			assert.Nil(tt, err)
 
-			snaps.MatchSnapshot(tt, stdoutStr, stderrStr)
+			snaps.WithConfig(
+				snaps.Filename("result.html"),
+				snaps.Dir(snapshotsDir),
+			).MatchSnapshot(tt, stdoutStr, stderrStr)
 		})
 	}
 }
