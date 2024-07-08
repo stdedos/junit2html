@@ -1,9 +1,14 @@
 package utils
 
 import (
+	"bytes"
 	"io"
 	"os"
 )
+
+type stringReader interface {
+	ReadString(delim byte) (line string, err error)
+}
 
 // CaptureOutput redirects stdout and stderr to a pipe and returns the output.
 func CaptureOutput(f func() error) (string, string, error) {
@@ -33,4 +38,22 @@ func CaptureOutput(f func() error) (string, string, error) {
 	sErr, _ := io.ReadAll(rErr)
 
 	return string(sOut), string(sErr), funcErr
+}
+
+// ReadUntilToken reads and returns until the delimiter is found.
+// The difference between this and `bufio.Scanner.ReadString()` is that
+// this function can scan for multiple bytes.
+func ReadUntilToken(r stringReader, delim []byte) (line []byte, err error) {
+	for {
+		var readUntilStringBuffer string
+		readUntilStringBuffer, err = r.ReadString(delim[len(delim)-1])
+		if err != nil {
+			return
+		}
+
+		line = append(line, []byte(readUntilStringBuffer)...)
+		if bytes.HasSuffix(line, delim) {
+			return line, nil
+		}
+	}
 }

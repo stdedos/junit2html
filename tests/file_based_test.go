@@ -81,9 +81,11 @@ func TestSnapshots(t *testing.T) {
 
 			stdoutStr, stderrStr, err := utils.CaptureOutput(func() error {
 				defer func() {
-					if x := recover(); x != nil {
-						assert.Nil(tt, x, "Panic: %v", x)
-					}
+					x := recover()
+					snaps.WithConfig(
+						snaps.Filename("error.log"),
+						snaps.Dir(snapshotsDir),
+					).MatchSnapshot(tt, x)
 				}()
 
 				cmd.EntryPoint(files)
@@ -94,7 +96,12 @@ func TestSnapshots(t *testing.T) {
 			snaps.WithConfig(
 				snaps.Filename("result.html"),
 				snaps.Dir(snapshotsDir),
-			).MatchSnapshot(tt, stdoutStr, stderrStr)
+			).MatchSnapshot(tt, stdoutStr)
+
+			snaps.WithConfig(
+				snaps.Filename("stderr.log"),
+				snaps.Dir(snapshotsDir),
+			).MatchSnapshot(tt, stderrStr)
 		})
 	}
 }
