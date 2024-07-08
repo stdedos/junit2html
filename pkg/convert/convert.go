@@ -27,7 +27,7 @@ func Convert(suitesArray []*reporters.JUnitTestSuites, files []string) (string, 
 	output += "<html>"
 	output += "<head>"
 	output += "<meta charset=\"UTF-8\">"
-	output += "<style>" + styles + "</style>"
+	output += "<style>\n" + styles + "</style>"
 	output += "</head>"
 	output += "<body>"
 	output += "<h1>Test Results</h1>"
@@ -122,11 +122,11 @@ func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestC
 	}
 	if testCase.SystemOut != "" {
 		testCase.SystemOut = re.ReplaceAllString(testCase.SystemOut, "")
-		output += fmt.Sprintf("<div class='content'><b>Stdout:</b> \n\n%s</div>\n", testCase.SystemOut)
+		output += fmt.Sprintf("<div class='content'><b>Stdout:</b>\n\n%s</div>\n", testCase.SystemOut)
 	}
 	if testCase.SystemErr != "" {
 		testCase.SystemErr = re.ReplaceAllString(testCase.SystemErr, "")
-		output += fmt.Sprintf("<div class='content'><b>Stderr:</b> \n\n%s</div>\n", testCase.SystemErr)
+		output += fmt.Sprintf("<div class='content'><b>Stderr:</b>\n\n%s</div>\n", testCase.SystemErr)
 	}
 
 	output += "</div>\n"

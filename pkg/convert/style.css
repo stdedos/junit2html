@@ -26,7 +26,6 @@ label {
     border: thin #eeeeee solid;
 }
 
-
 .passed label {
     background-color: #dfd;
 }
@@ -74,7 +73,7 @@ label {
     color: #444;
     white-space: pre;
     background-color: #EEE;
-    font-family: 'Courier New';
+    font-family: 'Courier New', serif;
     text-wrap: wrap;
 }
 
