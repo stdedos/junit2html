@@ -109,13 +109,13 @@ func printTest(testSuite reporters.JUnitTestSuite, testCase reporters.JUnitTestC
 	case tcError != nil:
 		tcError.Message = re.ReplaceAllString(tcError.Message, "")
 		tcError.Description = re.ReplaceAllString(tcError.Description, "")
-		output += fmt.Sprintf("<div class='content'><b>Error message:</b> \n\n%s</div>\n", tcError.Message)
-		output += fmt.Sprintf("<div class='content'><b>Error description:</b> \n\n%s</div>\n", tcError.Description)
+		output += fmt.Sprintf("<div class='content'><b>Error message:</b>\n\n%s</div>\n", tcError.Message)
+		output += fmt.Sprintf("<div class='content'><b>Error description:</b>\n\n%s</div>\n", tcError.Description)
 	case failure != nil:
 		failure.Message = re.ReplaceAllString(failure.Message, "")
 		failure.Description = re.ReplaceAllString(failure.Description, "")
-		output += fmt.Sprintf("<div class='content'><b>Failure message:</b> \n\n%s</div>\n", failure.Message)
-		output += fmt.Sprintf("<div class='content'><b>Failure description:</b> \n\n%s</div>\n", failure.Description)
+		output += fmt.Sprintf("<div class='content'><b>Failure message:</b>\n\n%s</div>\n", failure.Message)
+		output += fmt.Sprintf("<div class='content'><b>Failure description:</b>\n\n%s</div>\n", failure.Description)
 	case skipped != nil:
 		skipped.Message = re.ReplaceAllString(skipped.Message, "")
 		output += fmt.Sprintf("<div class='content'>%s</div>\n", skipped.Message)
