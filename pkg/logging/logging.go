@@ -3,17 +3,16 @@ package logging
 import (
 	"io"
 	"log"
+	"log/slog"
 	"math"
 	"os"
-
-	"golang.org/x/exp/slog"
 )
 
 // DefaultLogLevel is the default application log level
 const DefaultLogLevel = slog.LevelInfo
 
-// LoggingDisabled is higher than any used level, so setting logLevel to this disables logging
-const LoggingDisabled = slog.Level(math.MaxInt)
+// LevelOff is higher than any used level, so setting logLevel to this effectively disables logging.
+const LevelOff = slog.Level(math.MaxInt)
 
 var logLevel slog.LevelVar
 
