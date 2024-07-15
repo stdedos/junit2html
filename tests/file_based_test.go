@@ -93,10 +93,17 @@ func TestSnapshots(t *testing.T) {
 			})
 			assert.Nil(tt, err)
 
+			const resultFilename = "output.html"
 			snaps.WithConfig(
-				snaps.Filename("output.html"),
+				snaps.Filename(resultFilename),
 				snaps.Dir(snapshotsDir),
 			).MatchSnapshot(tt, stdoutStr)
+
+			// Also create the "pure" HTML file
+			err = os.MkdirAll(wd.Name()+"/result", 0o755)
+			assert.Nil(tt, err)
+			err = os.WriteFile(wd.Name()+"/result/"+resultFilename, []byte(stdoutStr), 0o644)
+			assert.Nil(tt, err)
 
 			snaps.WithConfig(
 				snaps.Filename("stderr.log"),
@@ -123,6 +130,10 @@ func inputAsGlobOrLiterally(dir os.DirEntry) ([]string, error) {
 		for _, file := range readDirList {
 			if file.IsDir() {
 				continue
+			}
+
+			if !strings.HasSuffix(file.Name(), ".xml") {
+				panic(fmt.Errorf("todo: remove at first inconvenience. but it is here to protect you (%s)", file.Name()))
 			}
 
 			files = append(files, fmt.Sprintf("%s/%s", dir.Name(), file.Name()))
