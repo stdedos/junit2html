@@ -1,0 +1,160 @@
+
+[TestSnapshots/testsuite_only_tag - 1]
+<html><head><meta charset="UTF-8"><style>
+body {
+    font-family: "Helvetica", sans-serif;
+    margin: 16px 64px;
+    background-color: white;
+}
+
+h4 {
+    padding: 4px 8px;
+}
+
+a {
+    display: block;
+}
+
+.coverage {
+    font-size: small;
+    font-weight: normal;
+    margin-left: 1em;
+}
+
+label {
+    padding: 8px 8px;
+    color: black;
+    text-decoration: none;
+    display: block;
+    border: thin #eeeeee solid;
+}
+
+.passed label {
+    background-color: #dfd;
+}
+
+.skipped label {
+    background-color: #eee;
+}
+
+.failed label {
+    background-color: #fdd;
+}
+
+.error label {
+    background-color: #fdf;
+}
+
+.badge {
+    background-color: #888;
+    color: white;
+    border-radius: 4px;
+    padding: 2px 8px;
+    float: right;
+}
+
+.passed .badge {
+    background-color: #5c5;
+}
+
+.failed .badge {
+    background-color: #d66;
+}
+
+.error .badge {
+    background-color: #a1a;
+}
+
+.expando {
+    padding: 8px;
+    display: none;
+}
+
+.content {
+    padding: 8px;
+    border-bottom: thin #eeeeee solid;
+    color: #444;
+    white-space: pre;
+    background-color: #EEE;
+    font-family: 'Courier New', serif;
+    text-wrap: wrap;
+}
+
+.duration {
+    font-size: medium;
+}
+
+div:target .expando {
+    display: block
+}
+
+.toggle-el {
+    /* padding: 2rem; */
+    /* height: 240px; */
+    background: white;
+    transition: all 0.2s ease;
+    opacity: 1;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+input[type=checkbox].hide-input:not(:checked) + .toggle-el {
+    height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+input.hide-input {
+    position: absolute;
+    left: -999em;
+}
+
+label.toggle {
+    display: block;
+    cursor: pointer;
+    padding: 0.5em 1em;
+    font-size: 1rem;
+    color: #242424;
+    /* background: #b5b5b5; */
+    border-radius: 3px;
+    user-select: none;
+}
+</style></head><body><h1>Test Results</h1><div class="suites"><h3>Suite Filename</h3><span>testsuite_only_tag/TEST-test.checks.abc.xml</span><p>1 of 1 tests failed</p>
+<h4>test.checks.abc</h4><div class='failed' id='div-test.checks.abc.test.checks.abc.test'>
+<label for='test.checks.abc.test.checks.abc.test' class='toggle'>test<span class='badge'>Fail</span></a></label>
+<input type='checkbox' name='one' id='test.checks.abc.test.checks.abc.test' class='hide-input'><div class='toggle-el'>
+<p class='duration' title='Test duration'>Test duration: 2s</p>
+<div class='content'><b>Failure message:</b>
+
+No issue raised. At least one issue expected</div>
+<div class='content'><b>Failure description:</b>
+
+java.lang.AssertionError: No issue raised. At least one issue expected
+    at org.sonar.java.checks.verifier.internal.InternalCheckVerifier.assertMultipleIssues(InternalCheckVerifier.java:396)
+    at org.sonar.java.checks.verifier.internal.InternalCheckVerifier.checkIssues(InternalCheckVerifier.java:336)
+    at org.sonar.java.checks.verifier.internal.InternalCheckVerifier.verifyAll(InternalCheckVerifier.java:324)
+    at org.sonar.java.checks.verifier.internal.InternalCheckVerifier.verifyIssues(InternalCheckVerifier.java:256)
+    at test.checks.abc.test(abc.java:13)
+    at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+    at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+    at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+</div>
+<div class='content'><b>Stderr:</b>
+
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+</div>
+</div>
+</div>
+<h4>test.checks.abc</h4></div><hr><div class="suites"><h3>Suite Filename</h3><span>testsuite_only_tag/TEST-test.def.xml</span><p>0 of 1 tests failed</p>
+<h4>test.def</h4><div class='passed' id='div-test.def.test.def.checkNumberRules'>
+<label for='test.def.test.def.checkNumberRules' class='toggle'>checkNumberRules<span class='badge'>Pass</span></a></label>
+<input type='checkbox' name='one' id='test.def.test.def.checkNumberRules' class='hide-input'><div class='toggle-el'>
+<p class='duration' title='Test duration'>Test duration: 0s</p>
+</div>
+</div>
+</div><hr></body></html>
+
+---
