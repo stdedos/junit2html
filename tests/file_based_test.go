@@ -61,7 +61,7 @@ func TestSnapshots(t *testing.T) {
 	t.Parallel()
 
 	testDirectories, err := os.ReadDir(".")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	for _, entry := range testDirectories {
 		switch {
@@ -77,33 +77,38 @@ func TestSnapshots(t *testing.T) {
 			snapshotsDir := "./" + wd.Name() + "/" + SnapshotsDir
 
 			files, err := inputAsGlobOrLiterally(wd)
-			assert.Nil(tt, err)
+			assert.NoError(tt, err)
+
+			var html string
 
 			stdoutStr, stderrStr, err := utils.CaptureOutput(func() error {
-				defer func() {
-					x := recover()
-					snaps.WithConfig(
-						snaps.Filename("error.log"),
-						snaps.Dir(snapshotsDir),
-					).MatchSnapshot(tt, x)
-				}()
+				html, err = cmd.EntryPoint(files)
 
-				cmd.EntryPoint(files)
+				snaps.WithConfig(
+					snaps.Filename("error.log"),
+					snaps.Dir(snapshotsDir),
+				).MatchSnapshot(tt, err)
+
 				return nil
 			})
-			assert.Nil(tt, err)
+
+			// We only need stderr here from now on,
+			// but let's make sure we have predictable output.
+			assert.Empty(tt, stdoutStr)
+			assert.NoError(tt, err)
 
 			const resultFilename = "output.html"
 			snaps.WithConfig(
 				snaps.Filename(resultFilename),
 				snaps.Dir(snapshotsDir),
-			).MatchSnapshot(tt, stdoutStr)
+			).MatchSnapshot(tt, html)
 
 			// Also create the "pure" HTML file
-			err = os.MkdirAll(wd.Name()+"/result", 0o755)
-			assert.Nil(tt, err)
-			err = os.WriteFile(wd.Name()+"/result/"+resultFilename, []byte(stdoutStr), 0o644)
-			assert.Nil(tt, err)
+			resultDir := wd.Name() + "/result"
+			err = os.MkdirAll(resultDir, 0o755)
+			assert.NoError(tt, err)
+			err = os.WriteFile(resultDir+"/"+resultFilename, []byte(html+"\n"), 0o644)
+			assert.NoError(tt, err)
 
 			snaps.WithConfig(
 				snaps.Filename("stderr.log"),

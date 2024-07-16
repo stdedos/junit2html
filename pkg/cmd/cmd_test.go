@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 	"testing"
@@ -18,6 +19,13 @@ const (
 	DefaultLogLevelForTest = slog.LevelInfo
 )
 
+func assertCapturedOutputOk(t *testing.T, stdout, stderr string, err error) {
+	t.Helper()
+	assert.Empty(t, stdout)
+	assert.Empty(t, stderr)
+	assert.NoError(t, err)
+}
+
 func TestGlobPattern(t *testing.T) {
 	origLogger := logging.Logger
 	defer func() { logging.Logger = origLogger }()
@@ -28,13 +36,16 @@ func TestGlobPattern(t *testing.T) {
 	logging.SetLevel(slog.LevelDebug)
 	defer logging.SetLevel(logging.DefaultLogLevel)
 
-	stdoutStr, _, err := utils.CaptureOutput(func() error {
-		EntryPoint([]string{"junit*.xml"})
+	var html string
+	stdout, stderr, err := utils.CaptureOutput(func() error {
+		var err error
+		html, err = EntryPoint([]string{"junit*.xml"})
+		assert.NoError(t, err)
 		return nil
 	})
-	assert.Nil(t, err)
+	assertCapturedOutputOk(t, stdout, stderr, err)
 
-	assert.Equal(t, strings.Count(stdoutStr, convert.SuitesStartDiv), 1, "stdout heuristic failed: %s", stdoutStr)
+	assert.Equal(t, strings.Count(html, convert.SuitesStartDiv), 1, "stdout heuristic failed: %s", html)
 
 	// 1 argument, 1 file (glob returns 1 file), 1 file-kind heuristic, 1 trailing newline.
 	stderrStr := loggingBuffer.String()
@@ -51,16 +62,20 @@ func TestMultiSuite(t *testing.T) {
 	logging.SetLevel(slog.LevelDebug)
 	defer logging.SetLevel(logging.DefaultLogLevel)
 
-	stdoutStr, _, err := utils.CaptureOutput(func() error {
-		EntryPoint([]string{DefaultCheckFile, DefaultCheckFile})
+	var html string
+	stdout, stderr, err := utils.CaptureOutput(func() error {
+		var err error
+		html, err = EntryPoint([]string{DefaultCheckFile, DefaultCheckFile})
+		assert.NoError(t, err)
 		return nil
 	})
+	assertCapturedOutputOk(t, stdout, stderr, err)
 
-	assert.Equal(t, strings.Count(stdoutStr, convert.SuitesStartDiv), 2, "stdout heuristic failed: %s", stdoutStr)
+	assert.Equal(t, strings.Count(html, convert.SuitesStartDiv), 2, "stdout heuristic failed: %s", html)
 	// 2 arguments (as CSV), 2 files (no glob involved), 2 file-kind heuristics, 1 trailing newline.
 	stderrStr := loggingBuffer.String()
 	assert.Equal(t, len(strings.Split(stderrStr, "\n")), 7, "stderr heuristic failed: %s", stderrStr)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestHelp(t *testing.T) {
@@ -72,25 +87,24 @@ func TestHelp(t *testing.T) {
 	logging.SetupLogger(&loggingBuffer)
 	logging.SetLevel(slog.LevelDebug)
 
-	stdoutStr, _, err := utils.CaptureOutput(func() error {
-		EntryPoint([]string{"--help"})
+	stdout, stderr, err := utils.CaptureOutput(func() error {
+		_, err := EntryPoint([]string{"--help"})
+		assert.NoError(t, err)
 		return nil
 	})
+	assert.Empty(t, stderr)
 
 	// Blatant copy-paste from `main_test.go`
-	assert.GreaterOrEqual(t, len(strings.Split(stdoutStr, "\n")), 10, "Help output heuristic failed: %s", stdoutStr)
-	assert.True(t, strings.HasPrefix(stdoutStr, "Usage:"), "Help output heuristic failed: %s", stdoutStr)
-	assert.True(t, strings.Contains(stdoutStr, "Help Options:"), "Help output heuristic failed: %s", stdoutStr)
-	assert.Nil(t, err)
+	assert.GreaterOrEqual(t, len(strings.Split(stdout, "\n")), 10, "Help output heuristic failed: %s", stdout)
+	assert.True(t, strings.HasPrefix(stdout, "Usage:"), "Help output heuristic failed: %s", stdout)
+	assert.True(t, strings.Contains(stdout, "Help Options:"), "Help output heuristic failed: %s", stdout)
+	assert.NoError(t, err)
 }
 
 func TestNotAnArgument(t *testing.T) {
-	assert.PanicsWithError(t, "error parsing flags: unknown flag `not-an-argument'", func() {
-		_, _, _ = utils.CaptureOutput(func() error {
-			EntryPoint([]string{"--not-an-argument"})
-			return nil
-		})
-	})
+	const notAnArgument = "not-an-argument"
+	_, err := EntryPoint([]string{"--" + notAnArgument})
+	assert.ErrorContains(t, err, fmt.Sprintf("error parsing flags: unknown flag `%s'", notAnArgument))
 }
 
 func TestVerboseLogger(t *testing.T) {
@@ -103,7 +117,8 @@ func TestVerboseLogger(t *testing.T) {
 	logging.SetLevel(DefaultLogLevelForTest)
 
 	_, _, _ = utils.CaptureOutput(func() error {
-		EntryPoint([]string{"-v", DefaultCheckFile})
+		_, err := EntryPoint([]string{"-v", DefaultCheckFile})
+		assert.NoError(t, err)
 		return nil
 	})
 
@@ -116,7 +131,8 @@ func TestQuietLogger(t *testing.T) {
 	defer logging.SetLevel(logging.DefaultLogLevel)
 
 	_, _, _ = utils.CaptureOutput(func() error {
-		EntryPoint([]string{"-q", DefaultCheckFile})
+		_, err := EntryPoint([]string{"-q", DefaultCheckFile})
+		assert.NoError(t, err)
 		return nil
 	})
 
@@ -129,7 +145,8 @@ func TestQsandVsAreEvaluated(t *testing.T) {
 	defer logging.SetLevel(logging.DefaultLogLevel)
 
 	_, _, _ = utils.CaptureOutput(func() error {
-		EntryPoint([]string{"-v", "-q", DefaultCheckFile})
+		_, err := EntryPoint([]string{"-v", "-q", DefaultCheckFile})
+		assert.NoError(t, err)
 		return nil
 	})
 

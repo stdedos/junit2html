@@ -11,8 +11,6 @@ import (
 
 	"github.com/stdedos/junit2html/pkg/cmd"
 	"github.com/stdedos/junit2html/pkg/utils"
-	"github.com/stretchr/testify/require"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,20 +22,27 @@ func TestMainFunctionViaPipe(t *testing.T) {
 	originalStdin := os.Stdin
 	defer func() { os.Stdin = originalStdin }()
 	os.Stdin, err = os.Open(DefaultReport)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
-	output, _, err := utils.CaptureOutput(func() error {
+	var html string
+	stdout, stderr, err := utils.CaptureOutput(func() error {
 		// Instead of main, and to avoid playing with arguments,
 		// we call the entry point directly.
-		cmd.EntryPoint([]string{})
+		html, err = cmd.EntryPoint([]string{})
+		assert.NoError(t, err)
 		return nil
 	})
+	assert.NoError(t, err)
 
-	assert.Contains(t, output, "<html>") // or any expected substring of the output HTML
-	assert.Nil(t, err)
+	// It is a bit hard to assert the exact output. Let's settle for a few guesses.
+	assert.GreaterOrEqual(t, len(strings.Split(html, "\n")), 10, "Help output heuristic failed: %s", html)
+
+	assert.Empty(t, stdout)
+	assert.Empty(t, stderr)
+	assert.NoError(t, err)
 }
 
-// TestMainIsWorking is used to test the main function.
+// TestMainAcceptsArgs is used to test the main function.
 // Executing a process and passing arguments in Golang is an ordeal;
 // we will settle for a simple PoC test (`--help` is passed along).
 func TestMainAcceptsArgs(t *testing.T) {
@@ -52,24 +57,24 @@ func TestMainAcceptsArgs(t *testing.T) {
 	proc.Env = append(os.Environ(), "BE_CRASHER=1")
 
 	stdoutPipe, err := proc.StdoutPipe()
-	require.Nil(t, err, "Failed to get stdout pipe: %v", err)
+	assert.Nil(t, err, "Failed to get stdout pipe: %v", err)
 
 	stderrPipe, err := proc.StderrPipe()
-	require.Nil(t, err, "Failed to get stderr pipe: %v", err)
+	assert.Nil(t, err, "Failed to get stderr pipe: %v", err)
 
 	err = proc.Start()
-	require.Nil(t, err)
+	assert.Nil(t, err)
 
 	var stdoutBuf, stderrBuf bytes.Buffer
 	_, err = io.Copy(&stdoutBuf, stdoutPipe)
-	require.Nil(t, err, "Failed to read stdout: %v", err)
+	assert.Nil(t, err, "Failed to read stdout: %v", err)
 
 	_, err = io.Copy(&stderrBuf, stderrPipe)
-	require.Nil(t, err, "Failed to read stderr: %v", err)
+	assert.Nil(t, err, "Failed to read stderr: %v", err)
 
 	var e *exec.ExitError
 	if errors.As(err, &e) && !e.Success() {
-		require.Nil(t, err, "process ran with err %v, want exit status 0", err)
+		assert.Nil(t, err, "process ran with err %v, want exit status 0", err)
 	}
 
 	stdoutStr := stdoutBuf.String()
