@@ -17,6 +17,16 @@ import (
 
 const DefaultReport = "examples/junit.xml"
 
+func stripViaTestExtraStdout(t *testing.T, stdout string) string {
+	t.Helper()
+
+	// Running via the test binary has its side effects.
+	coverageRe := regexp.MustCompile(`coverage: [\d.]+% of statements.*\n$`)
+	stdout = coverageRe.ReplaceAllString(stdout, "")
+	stdout = strings.TrimSuffix(stdout, "PASS\n")
+	return stdout
+}
+
 func TestMainFunctionViaPipe(t *testing.T) {
 	var err error
 
@@ -134,13 +144,7 @@ func TestMainExampleRun(t *testing.T) {
 		assert.NoError(t, err, "process ran with err %v, want exit status 0", err)
 	}
 
-	stdoutStr := stdoutBuf.String()
-
-	// Running via the test binary has its side effects.
-	coverageRe := regexp.MustCompile(`coverage: [\d.]+% of statements.*\n$`)
-	stdoutStr = coverageRe.ReplaceAllString(stdoutStr, "")
-	stdoutStr = strings.TrimSuffix(stdoutStr, "PASS\n")
-	stderrStr := stderrBuf.String()
+	stdoutStr := stripViaTestExtraStdout(t, stdoutBuf.String())
 
 	// Let's not do snapshot testing here.
 	// We have an almost-same snapshot in ``tests/my_first_test``,
@@ -163,5 +167,43 @@ func TestMainExampleRun(t *testing.T) {
 		EOFWithNewLine, stdoutStr[len(stdoutStr)-len(EOFWithNewLine)*3:],
 	)
 
-	assert.Empty(t, stderrStr, stderrStr)
+	assert.Empty(t, stderrBuf.String())
+}
+
+// TestMainVersion is used to validate the `-V` / `--version` argument.
+func TestMainVersion(t *testing.T) {
+	// Inspiration: https://go.dev/talks/2014/testing.slide#23
+	if os.Getenv("BE_CRASHER") == "1" {
+		os.Args[1] = "--version"
+		main()
+		return
+	}
+
+	proc := exec.Command(os.Args[0], "-test.run=TestMainVersion")
+	proc.Env = append(os.Environ(), "BE_CRASHER=1")
+
+	stdoutPipe, err := proc.StdoutPipe()
+	assert.Nil(t, err, "Failed to get stdout pipe: %v", err)
+
+	stderrPipe, err := proc.StderrPipe()
+	assert.Nil(t, err, "Failed to get stderr pipe: %v", err)
+
+	err = proc.Start()
+	assert.Nil(t, err)
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	_, err = io.Copy(&stdoutBuf, stdoutPipe)
+	assert.Nil(t, err, "Failed to read stdout: %v", err)
+
+	_, err = io.Copy(&stderrBuf, stderrPipe)
+	assert.Nil(t, err, "Failed to read stderr: %v", err)
+
+	var e *exec.ExitError
+	if errors.As(err, &e) && !e.Success() {
+		assert.Nil(t, err, "process ran with err %v, want exit status 0", err)
+	}
+
+	stdoutStr := stripViaTestExtraStdout(t, stdoutBuf.String())
+	assert.Equal(t, "junit2html dev, unknown (none)\n", stdoutStr)
+	assert.Empty(t, stderrBuf.String())
 }

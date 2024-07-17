@@ -153,3 +153,23 @@ func TestQsandVsAreEvaluated(t *testing.T) {
 	assert.True(t, logging.Logger.Handler().Enabled(context.TODO(), slog.LevelInfo))
 	assert.False(t, logging.Logger.Handler().Enabled(context.TODO(), slog.LevelDebug))
 }
+
+func TestVersionArgument(t *testing.T) {
+	logging.SetLevel(DefaultLogLevelForTest)
+	defer logging.SetLevel(logging.DefaultLogLevel)
+
+	args := []string{"-V", "--version"}
+
+	for _, arg := range args {
+		stdout, stderr, err := utils.CaptureOutput(func() error {
+			_, err := EntryPoint([]string{arg})
+			assert.NoError(t, err)
+			return nil
+		})
+
+		// These variables are only set during the GoReleaser build process
+		assert.Equal(t, "junit2html dev, unknown (none)", stdout)
+		assert.Empty(t, stderr)
+		assert.NoError(t, err)
+	}
+}

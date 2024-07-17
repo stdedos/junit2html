@@ -13,14 +13,26 @@ import (
 type Options struct {
 	Verbose []bool `short:"v" long:"verbose" description:"Increase verbosity"`
 	Quiet   []bool `short:"q" long:"quiet" description:"Decrease verbosity"`
+	Version bool   `short:"V" long:"version" description:"Print version and exit"`
 }
 
 var opts Options
+
+var (
+	Version = "dev"
+	Commit  = "none"
+	Date    = "unknown"
+)
 
 func EntryPoint(args []string) (string, error) {
 	positionalArgs, err := flags.ParseArgs(&opts, args)
 
 	if flags.WroteHelp(err) {
+		return "", nil
+	}
+
+	if opts.Version {
+		fmt.Printf("junit2html %s, %s (%s)", Version, Date, Commit)
 		return "", nil
 	}
 

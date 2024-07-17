@@ -2,11 +2,12 @@ name: GoReleaser
 
 on:
   push:
-    tags:
-      - "*"
+  pull_request:
 
 permissions:
+  attestations: write
   contents: write
+  id-token: write
   # packages: write
   # issues: write
 
@@ -28,12 +29,37 @@ jobs:
           go-version: ${{ env.CI_GO_VERSION }}
           cache: true
 
-      # More assembly might be required: Docker logins, GPG, etc. It all depends
-      # on your needs.
+      - uses: anchore/sbom-action/download-syft@d94f46e13c6c62f59525ac9a1e147a99dc0b9bf5 # v0.17.0
+
+      # More assembly might be required: Docker logins, GPG, etc. It all depends on what is needed.
       - uses: goreleaser/goreleaser-action@d33b6f6aeabd7fed8bb3fbf32c4d890d29f48545 # v2
         with:
           distribution: goreleaser
-          version: latest
-          args: release --clean
+          version: "~> v2"
+          args: release --clean ${{ (startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/pull/') || startsWith(github.ref, 'refs/tags/SNAP/')) && '--snapshot' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dist-build-directory
+          # ... would've been amazing if we could pack each binary separately.
+          path:
+            dist/*
+
+      # Attest the binaries
+      - uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+        if: "!startsWith(github.ref, 'refs/pull/')" # id-token cannot be given in `pull_request:` target
+        with:
+          subject-path: |-
+            dist/junit2html_*/junit2html_*
+            dist/junit2html_*/junit2html_*
+
+      # Attest the SBOM
+      - uses: actions/attest-sbom@6d7733f629ce1368bd053e269afa8041a98a2b98 # v1.3.3
+        if: "!startsWith(github.ref, 'refs/pull/')" # id-token cannot be given in `pull_request:` target
+        with:
+          subject-path: |-
+            dist/junit2html_*.source.tar.gz
+          sbom-path: "dist/source.sbom.spdx.json"

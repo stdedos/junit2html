@@ -6,16 +6,62 @@ version: 2
 builds:
   - env:
       - CGO_ENABLED=0
+    binary: "{{ tolower .ProjectName }}_{{ trimprefix .Version \"v\" }}"
+    mod_timestamp: "{{ .CommitTimestamp }}"
     goos:
       - linux
       - windows
       - darwin
+    ldflags:
+      - -s -w
+      - -X github.com/stdedos/junit2html/pkg/cmd.Version={{.Tag}}
+      - -X github.com/stdedos/junit2html/pkg/cmd.Commit={{.FullCommit}}
+      - -X github.com/stdedos/junit2html/pkg/cmd.Date={{.CommitDate}}
+      - -X github.com/stdedos/junit2html/pkg/cmd.BuiltBy=goreleaser
+
+# Verifiable Build
+gomod:
+  proxy: true
+  env:
+    - GOPROXY=https://proxy.golang.org,direct
+    - GOSUMDB=sum.golang.org
+  mod: mod
+
+sboms:
+  - id: spdx
+    ids:
+      - default
+    artifacts: archive
+    documents:
+      - "${artifact}.sbom.spdx.json"
+    args: ["$artifact", "--output", "spdx-json=$document"]
+  # # Missing a way to install CycloneDX
+  # - id: cyclonedx
+  #   ids:
+  #     - default
+  #   artifacts: archive
+  #   documents:
+  #     - "${artifact}.cyclonedx.json"
+  #   args: ["$artifact", "--output", "cyclonedx-json=$document"]
+  # # Needed for attestation: attest-sbom accepts one argument only
+  - id: spdx-source
+    artifacts: source
+    documents:
+      - "source.sbom.spdx.json"
+
+# Only for the source sbom generation
+source:
+  enabled: true
+  name_template: "{{ .ProjectName }}_{{ .Version }}.source"
 
 archives:
-  - format: tar.gz
+  - id: default # The default, links to `sboms:`
+    format: tar.gz
+    wrap_in_directory: true
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
-      {{ .ProjectName }}_
+      {{- .ProjectName }}_
+      {{- .Version }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
@@ -25,6 +71,17 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+    # # sboms are built after archives - so they cannot be included in the archive
+    # files:
+    #   - 'LICENSE*'
+    #   - 'README*'
+    #   # Defaults ^^^ Not all of them, since missing `files:` is an error
+    #   - src: "dist/source.sbom.spdx.json"
+    #     strip_parent: true
+
+
+snapshot:
+  name_template: "{{ .Summary }}-SNAPSHOT"
 
 changelog:
   sort: asc
