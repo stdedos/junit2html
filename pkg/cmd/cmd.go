@@ -17,15 +17,15 @@ type Options struct {
 
 var opts Options
 
-func EntryPoint(args []string) {
+func EntryPoint(args []string) (string, error) {
 	positionalArgs, err := flags.ParseArgs(&opts, args)
 
 	if flags.WroteHelp(err) {
-		return
+		return "", nil
 	}
 
 	if err != nil {
-		panic(fmt.Errorf("error parsing flags: %w", err))
+		return "", fmt.Errorf("error parsing flags: %w", err)
 	}
 
 	if opts.Verbose != nil || opts.Quiet != nil {
@@ -39,10 +39,5 @@ func EntryPoint(args []string) {
 	files := parse.Files(positionalArgs)
 	suites := parse.Suites(files)
 
-	html, err := convert.Convert(suites, files)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(html)
+	return convert.Convert(suites, files)
 }
