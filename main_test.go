@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/stdedos/junit2html/pkg/cmd"
 	"github.com/stdedos/junit2html/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -160,11 +162,18 @@ func TestMainExampleRun(t *testing.T) {
 	)
 
 	EOFWithNewLine := "</body></html>\n"
+	substringLength := len(stdoutStr) - len(EOFWithNewLine)*3
+
+	if substringLength < 0 {
+		require.Greater(t, substringLength, 0, "Substring length is negative: %d (stdout: %d, expected string: %d)", substringLength, len(stdoutStr), len(EOFWithNewLine))
+		substringLength = 0
+	}
+
 	assert.True(
 		t,
 		strings.HasSuffix(stdoutStr, EOFWithNewLine),
 		"Main output MUST end with %#v: %#v",
-		EOFWithNewLine, stdoutStr[len(stdoutStr)-len(EOFWithNewLine)*3:],
+		EOFWithNewLine, stdoutStr[substringLength:],
 	)
 
 	assert.Empty(t, stderrBuf.String())

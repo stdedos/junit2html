@@ -24,6 +24,12 @@ jobs:
         shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || '/bin/bash --noprofile --norc -Eeuxo pipefail {0}' }}
 
     steps:
+      - name: git-config for windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -39,7 +45,6 @@ jobs:
         run: go mod tidy
 
       - name: Run tests
-        continue-on-error: ${{ matrix.os == 'windows-latest' && true || false }}
         run: go test $(go list ./... | grep -v /junit2html/example) -race -coverprofile=coverage.out
 
       - name: Upload coverage reports to Codecov
