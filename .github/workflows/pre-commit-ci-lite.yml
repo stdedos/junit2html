@@ -17,7 +17,7 @@ jobs:
         python-version: 3.x
 
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
         # Opposed to `tests.yaml`, we set it to a golangci-lint-compatible version:
         # https://github.com/golangci/golangci-lint/discussions/4830
