@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -eux
+set -eu
 
 # Requires jq, curl
 if ! command -v jq >/dev/null; then
@@ -18,11 +18,10 @@ tag="${1:-}"
 if [ -z "$tag" ]; then
     echo "No tag provided; downloading the latest release"
     tag="$(curl --retry 3 -s "https://api.github.com/repos/stdedos/junit2html/releases/latest" | jq -r '.tag_name')"
-    exit 1
 fi
 
 version=$(echo "${tag}" | cut -c 2-)
 url="https://github.com/stdedos/junit2html/releases/download/${tag}/junit2html_${version}_$(uname)_$(uname -m | sed 's/aarch64/arm64/').tar.gz"
-curl --retry 3 -L "${url}" | tar -zxvf - "junit2html_*"
+curl --retry 3 -L "${url}" | tar --wildcards -zxvf - "junit2html_*"
 
 chmod +x junit2html_*
