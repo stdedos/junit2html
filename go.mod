@@ -3,7 +3,7 @@ module github.com/stdedos/junit2html
 go 1.22
 
 require (
-	github.com/gkampitakis/go-snaps v0.5.4
+	github.com/gkampitakis/go-snaps v0.5.7
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/stretchr/testify v1.9.0
