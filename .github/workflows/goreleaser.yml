@@ -49,7 +49,7 @@ jobs:
             dist/*
 
       # Attest the binaries
-      - uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+      - uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1 # v1.4.2
         if: "!startsWith(github.ref, 'refs/pull/')" # id-token cannot be given in `pull_request:` target
         with:
           subject-path: |-
